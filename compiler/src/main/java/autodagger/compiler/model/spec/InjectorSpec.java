@@ -3,7 +3,7 @@ package autodagger.compiler.model.spec;
 import com.squareup.javapoet.TypeName;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class InjectorSpec {
 

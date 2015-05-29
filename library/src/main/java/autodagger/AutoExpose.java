@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD})

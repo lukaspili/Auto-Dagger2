@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import autodagger.AutoExpose;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @AutoExpose(MainActivity.class)
 @DaggerScope(MainActivity.class)

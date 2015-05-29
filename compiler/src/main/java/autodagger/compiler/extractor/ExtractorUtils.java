@@ -18,7 +18,7 @@ import javax.lang.model.util.Types;
 /**
  * Mix of own code and from stackoverflow.com
  *
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 final class ExtractorUtils {
 

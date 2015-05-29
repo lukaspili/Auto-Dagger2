@@ -9,7 +9,7 @@ import autodagger.AutoExpose;
 import autodagger.compiler.extractor.AutoExposedExtractor;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class ExposedProcessingStep implements ProcessingStep {
 

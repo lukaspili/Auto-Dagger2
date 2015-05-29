@@ -10,7 +10,7 @@ import autodagger.compiler.extractor.AutoInjectorExtractor;
 import autodagger.compiler.message.MessageDelivery;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class InjectorProcessingStep implements ProcessingStep {
 

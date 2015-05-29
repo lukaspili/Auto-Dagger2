@@ -17,7 +17,7 @@ import dagger.Component;
 /**
  * Actually it generates readable and understandable code!
  *
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class MisunderstoodPoet {
 

@@ -17,7 +17,7 @@ import autodagger.AutoComponent;
 import autodagger.compiler.message.Message;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class AutoComponentExtractor {
 

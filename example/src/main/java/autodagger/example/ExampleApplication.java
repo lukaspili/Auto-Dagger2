@@ -5,7 +5,7 @@ import android.app.Application;
 import autodagger.AutoComponent;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @AutoComponent(
         modules = {ExampleApplication.Module1.class, ExampleApplication.Module2.class}

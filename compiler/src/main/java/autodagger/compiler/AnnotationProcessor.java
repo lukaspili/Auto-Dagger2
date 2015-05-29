@@ -22,7 +22,7 @@ import autodagger.compiler.processingstep.ProcessingStep;
 import autodagger.compiler.processingstep.ProcessingStepBus;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @AutoService(Processor.class)
 public class AnnotationProcessor extends AbstractProcessor {

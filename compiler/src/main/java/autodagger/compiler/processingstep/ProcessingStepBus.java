@@ -15,7 +15,7 @@ import autodagger.compiler.extractor.AutoInjectorExtractor;
 /**
  * Pass data between processing steps
  *
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class ProcessingStepBus {
 

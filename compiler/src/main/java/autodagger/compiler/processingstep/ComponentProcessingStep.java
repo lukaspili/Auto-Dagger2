@@ -44,7 +44,7 @@ import autodagger.compiler.names.ClassNames;
 import dagger.Provides;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class ComponentProcessingStep implements ProcessingStep {
 

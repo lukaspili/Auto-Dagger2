@@ -8,7 +8,7 @@ import javax.annotation.processing.Messager;
 import javax.tools.Diagnostic;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class MessageDelivery {
 

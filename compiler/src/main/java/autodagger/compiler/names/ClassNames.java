@@ -9,7 +9,7 @@ import javax.lang.model.element.Element;
 /**
  * All the logic about class names for a specific element in one place
  *
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class ClassNames {
 

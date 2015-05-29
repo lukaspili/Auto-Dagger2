@@ -10,7 +10,7 @@ import javax.lang.model.type.TypeMirror;
 import autodagger.AutoExpose;
 
 /**
- * @author Lukasz Piliszczuk <lukasz.pili@gmail.com>
+ * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class AutoExposedExtractor {
 
