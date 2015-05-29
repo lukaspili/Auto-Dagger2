@@ -187,8 +187,8 @@ repositories {
 }
 
 dependencies {
-    apt 'com.github.lukaspili:autodagger2-compiler:0.6-SNAPSHOT'
-    compile 'com.github.lukaspili:autodagger2:0.6-SNAPSHOT'
+    apt 'com.github.lukaspili:autodagger2-compiler:1.0'
+    compile 'com.github.lukaspili:autodagger2:1.0'
 }
 ```
 
