@@ -1,0 +1,21 @@
+ext.deps = [
+        dagger2                : 'com.google.dagger:dagger:2.0',
+        dagger2_compiler       : 'com.google.dagger:dagger-compiler:2.0',
+        javax_annotation_jsr250: 'javax.annotation:jsr250-api:1.0',
+]
+
+subprojects {
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+    }
+
+    repositories {
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+        mavenCentral()
+    }
+
+    group = GROUP
+    version = VERSION_NAME
+}
