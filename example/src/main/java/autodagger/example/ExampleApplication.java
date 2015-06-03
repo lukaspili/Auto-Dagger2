@@ -10,7 +10,7 @@ import autodagger.AutoComponent;
 @AutoComponent(
         modules = {ExampleApplication.Module1.class, ExampleApplication.Module2.class}
 )
-@DaggerScope(ExampleApplication.class)
+@ScopeApplication()
 public class ExampleApplication extends Application {
 
     private ExampleApplicationComponent component;

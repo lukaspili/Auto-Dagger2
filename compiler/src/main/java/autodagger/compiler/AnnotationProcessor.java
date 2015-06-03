@@ -11,7 +11,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 import autodagger.compiler.message.MessageDelivery;
@@ -36,22 +35,18 @@ public class AnnotationProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-
         processingSteps = new LinkedHashSet<>();
         processingSteps.add(new InjectorProcessingStep(processingStepBus, messageDelivery));
         processingSteps.add(new ExposedProcessingStep(processingStepBus));
-        processingSteps.add(new ComponentProcessingStep(processingEnv.getTypeUtils(), processingEnv.getElementUtils(), processingEnv.getFiler(), messageDelivery, processingStepBus));
+        processingSteps.add(new ComponentProcessingStep(processingStepBus, messageDelivery));
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (stop) return false;
-
         for (ProcessingStep processingStep : processingSteps) {
-            Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(processingStep.annotation());
-            processingStep.process(elements);
+            processingStep.process(processingEnv, roundEnv);
         }
-
         messageDelivery.deliver(processingEnv.getMessager());
         if (messageDelivery.hasErrors()) {
             stop = true;

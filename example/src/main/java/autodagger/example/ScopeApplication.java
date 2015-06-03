@@ -10,6 +10,5 @@ import javax.inject.Scope;
  */
 @Scope
 @Retention(RetentionPolicy.SOURCE)
-public @interface DaggerScope {
-    Class<?> value();
+public @interface ScopeApplication {
 }
