@@ -16,10 +16,18 @@ public class AutoComponentClassNameUtil {
         String pkg = MoreElements.getPackage(element).getQualifiedName().toString();
         String name = element.getSimpleName().toString();
 
-        if (!StringUtils.endsWith(name, "Component")) {
-            name = name + "Component";
+        return ClassName.get(pkg, getComponentSimpleName(name));
+    }
+
+    public static ClassName getComponentClassName(ClassName elementClassName) {
+        return ClassName.get(elementClassName.packageName(), getComponentSimpleName(elementClassName.simpleName()));
+    }
+
+    public static String getComponentSimpleName(String elementName) {
+        if (!StringUtils.endsWith(elementName, "Component")) {
+            return elementName + "Component";
         }
 
-        return ClassName.get(pkg, name);
+        return elementName;
     }
 }
