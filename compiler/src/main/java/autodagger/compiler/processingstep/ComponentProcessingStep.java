@@ -3,7 +3,6 @@ package autodagger.compiler.processingstep;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.common.base.Preconditions;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -37,7 +36,7 @@ import autodagger.compiler.message.MessageDelivery;
 import autodagger.compiler.model.spec.ComponentSpec;
 import autodagger.compiler.model.spec.ExposedSpec;
 import autodagger.compiler.model.spec.InjectorSpec;
-import autodagger.compiler.names.ClassNames;
+import autodagger.compiler.utils.AutoComponentNamePolicy;
 import dagger.Provides;
 
 /**
@@ -85,9 +84,7 @@ public class ComponentProcessingStep extends ProcessingStep {
 
         List<ComponentSpec> componentSpecs = new ArrayList<>();
         for (AutoComponentExtractor componentExtractor : extractors) {
-            ClassNames classNames = new ClassNames(componentExtractor.getElement());
-
-            ComponentSpec componentSpec = buildComponent(componentExtractor, classNames, processingStepBus.getInjectorExtractors(), processingStepBus.getExposedExtractors(), processingStepBus.getComponentTargets());
+            ComponentSpec componentSpec = buildComponent(componentExtractor, processingStepBus.getInjectorExtractors(), processingStepBus.getExposedExtractors(), processingStepBus.getComponentTargets());
             componentSpecs.add(componentSpec);
         }
 
@@ -97,7 +94,7 @@ public class ComponentProcessingStep extends ProcessingStep {
         }
     }
 
-    private void addAutoComponentExtractor(List<AutoComponentExtractor> extractors, Element targetElement,Element autoComponentElement) {
+    private void addAutoComponentExtractor(List<AutoComponentExtractor> extractors, Element targetElement, Element autoComponentElement) {
         AutoComponentExtractor componentExtractor = new AutoComponentExtractor(targetElement, autoComponentElement, processingEnvironment.getTypeUtils(), processingEnvironment.getElementUtils());
 
         boolean valid = validateComponentExtractor(componentExtractor);
@@ -110,14 +107,13 @@ public class ComponentProcessingStep extends ProcessingStep {
         processingStepBus.getComponentTargets().put(componentExtractor.getTargetTypeMirror(), componentExtractor.getElement());
     }
 
-    private ComponentSpec buildComponent(AutoComponentExtractor componentExtractor, ClassNames classNames, List<AutoInjectorExtractor> injectorExtractors, List<AutoExposedExtractor> exposedExtractors, Map<TypeMirror, Element> targetsTypeMirrors) {
+    private ComponentSpec buildComponent(AutoComponentExtractor componentExtractor, List<AutoInjectorExtractor> injectorExtractors, List<AutoExposedExtractor> exposedExtractors, Map<TypeMirror, Element> targetsTypeMirrors) {
         Preconditions.checkNotNull(componentExtractor, "Component extractor cannot be null");
-        Preconditions.checkNotNull(classNames, "ClassNames cannot be null");
         Preconditions.checkNotNull(injectorExtractors, "Injector extractors cannot be null");
         Preconditions.checkNotNull(exposedExtractors, "Expose extractors cannot be null");
         Preconditions.checkNotNull(targetsTypeMirrors, "Targets type mirrors cannot be null");
 
-        ComponentSpec componentSpec = new ComponentSpec(classNames.getComponentClassName());
+        ComponentSpec componentSpec = new ComponentSpec(AutoComponentNamePolicy.getComponentClassName(componentExtractor.getElement()));
         componentSpec.setElement(componentExtractor.getElement());
         componentSpec.setScopeAnnotationMirror(componentExtractor.getScopeAnnotationTypeMirror());
 
@@ -157,9 +153,7 @@ public class ComponentProcessingStep extends ProcessingStep {
             for (Map.Entry<TypeMirror, Element> entry : targetsTypeMirrors.entrySet()) {
                 if (ProcessingUtils.compareTypeWithOneOfSeverals(entry.getKey(), typeMirror)) {
                     Element element = entry.getValue();
-                    String pkg = MoreElements.getPackage(element).getQualifiedName().toString();
-                    ClassName className = ClassName.get(pkg, ClassNames.buildComponentName(element));
-                    typeNames.add(className);
+                    typeNames.add(AutoComponentNamePolicy.getComponentClassName(element));
                     continue loop;
                 }
             }
