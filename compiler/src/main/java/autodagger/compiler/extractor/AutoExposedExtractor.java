@@ -17,11 +17,11 @@ public class AutoExposedExtractor {
     private final Element element;
     private final List<TypeMirror> typeMirrors;
 
-    public AutoExposedExtractor(Element element) {
-        this.element = element;
+    public AutoExposedExtractor(Element targetElement,Element autoExposeElement) {
+        this.element = targetElement;
 
         typeMirrors = new ArrayList<>();
-        List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, AutoExpose.class, "value");
+        List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(autoExposeElement, AutoExpose.class, "value");
         if (values != null) {
             for (AnnotationValue value : values) {
                 TypeMirror tm = (TypeMirror) value.getValue();

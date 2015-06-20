@@ -36,18 +36,18 @@ public class AutoComponentExtractor {
     private List<Message> messages = new ArrayList<>();
     private boolean errors;
 
-    public AutoComponentExtractor(Element element, Types types, Elements elements) {
-        this.element = element;
+    public AutoComponentExtractor(Element targetElement,Element autoComponentElement, Types types, Elements elements) {
+        this.element = targetElement;
 
-        TypeMirror typeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_TARGET);
+        TypeMirror typeMirror = ExtractorUtils.getValueFromAnnotation(autoComponentElement, AutoComponent.class, ANNOTATION_TARGET);
         if (typeMirror == null) {
-            typeMirror = element.asType();
+            typeMirror = targetElement.asType();
         }
         targetTypeMirror = typeMirror;
 
-        dependenciesTypeMirrors = findTypeMirrors(element, ANNOTATION_DEPENDENCIES);
-        modulesTypeMirrors = findTypeMirrors(element, ANNOTATION_MODULES);
-        superinterfacesTypeMirrors = findTypeMirrors(element, ANNOTATION_SUPERINTERFACES);
+        dependenciesTypeMirrors = findTypeMirrors(autoComponentElement, ANNOTATION_DEPENDENCIES);
+        modulesTypeMirrors = findTypeMirrors(autoComponentElement, ANNOTATION_MODULES);
+        superinterfacesTypeMirrors = findTypeMirrors(autoComponentElement, ANNOTATION_SUPERINTERFACES);
         scopeAnnotationTypeMirror = findScope();
     }
 

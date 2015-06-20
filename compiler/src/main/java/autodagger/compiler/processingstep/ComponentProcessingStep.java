@@ -18,15 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 import autodagger.AutoComponent;
 import autodagger.AutoExpose;
@@ -46,25 +43,16 @@ import dagger.Provides;
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-public class ComponentProcessingStep implements ProcessingStep {
+public class ComponentProcessingStep extends ProcessingStep {
 
-    private final Types types;
-    private final Elements elements;
-    private final Filer filer;
     private final MessageDelivery messageDelivery;
     private final ProcessingStepBus processingStepBus;
     private final MisunderstoodPoet misunderstoodPoet;
 
-    public ComponentProcessingStep(Types types, Elements elements, Filer filer, MessageDelivery messageDelivery, ProcessingStepBus processingStepBus) {
-        Preconditions.checkNotNull(types);
-        Preconditions.checkNotNull(elements);
-        Preconditions.checkNotNull(filer);
+    public ComponentProcessingStep(ProcessingStepBus processingStepBus, MessageDelivery messageDelivery) {
         Preconditions.checkNotNull(messageDelivery);
         Preconditions.checkNotNull(processingStepBus);
 
-        this.types = types;
-        this.elements = elements;
-        this.filer = filer;
         this.messageDelivery = messageDelivery;
         this.processingStepBus = processingStepBus;
 
@@ -80,16 +68,15 @@ public class ComponentProcessingStep implements ProcessingStep {
     public void process(Set<? extends Element> elements) {
         List<AutoComponentExtractor> extractors = new ArrayList<>();
         for (Element element : elements) {
-            AutoComponentExtractor componentExtractor = new AutoComponentExtractor(element, this.types, this.elements);
 
-            boolean valid = validateComponentExtractor(componentExtractor);
-            if (!valid) {
-                // do not try to build screen for already invalid element
+            if (ElementKind.ANNOTATION_TYPE.equals(element.getKind())) {
+                Set<? extends Element> targetElements = roundEnv.getElementsAnnotatedWith(MoreElements.asType(element));
+                for (Element targetElement : targetElements) {
+                    addAutoComponentExtractor(extractors, targetElement, element);
+                }
                 continue;
             }
-
-            extractors.add(componentExtractor);
-            processingStepBus.getComponentTargets().put(componentExtractor.getTargetTypeMirror(), componentExtractor.getElement());
+            addAutoComponentExtractor(extractors, element, element);
         }
 
         if (extractors.isEmpty()) {
@@ -108,6 +95,19 @@ public class ComponentProcessingStep implements ProcessingStep {
         if (valid) {
             generateSpecs(componentSpecs);
         }
+    }
+
+    private void addAutoComponentExtractor(List<AutoComponentExtractor> extractors, Element targetElement,Element autoComponentElement) {
+        AutoComponentExtractor componentExtractor = new AutoComponentExtractor(targetElement, autoComponentElement, processingEnvironment.getTypeUtils(), processingEnvironment.getElementUtils());
+
+        boolean valid = validateComponentExtractor(componentExtractor);
+        if (!valid) {
+            // do not try to build screen for already invalid element
+            return;
+        }
+
+        extractors.add(componentExtractor);
+        processingStepBus.getComponentTargets().put(componentExtractor.getTargetTypeMirror(), componentExtractor.getElement());
     }
 
     private ComponentSpec buildComponent(AutoComponentExtractor componentExtractor, ClassNames classNames, List<AutoInjectorExtractor> injectorExtractors, List<AutoExposedExtractor> exposedExtractors, Map<TypeMirror, Element> targetsTypeMirrors) {
@@ -315,7 +315,7 @@ public class ComponentProcessingStep implements ProcessingStep {
 
     private void write(JavaFile javaFile, Element element) {
         try {
-            javaFile.writeTo(filer);
+            javaFile.writeTo(processingEnvironment.getFiler());
         } catch (Exception e) {
             StringWriter stackTrace = new StringWriter();
             e.printStackTrace(new PrintWriter(stackTrace));

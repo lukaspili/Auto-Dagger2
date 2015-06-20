@@ -17,11 +17,10 @@ public class AutoInjectorExtractor {
     private final Element element;
     private final List<TypeMirror> typeMirrors;
 
-    public AutoInjectorExtractor(Element element) {
-        this.element = element;
-
+    public AutoInjectorExtractor(Element targetElement, Element autoInjectorElement) {
+        this.element = targetElement;
         typeMirrors = new ArrayList<>();
-        List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, AutoInjector.class, "value");
+        List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(autoInjectorElement, AutoInjector.class, "value");
         if (values != null) {
             for (AnnotationValue value : values) {
                 TypeMirror tm = (TypeMirror) value.getValue();
