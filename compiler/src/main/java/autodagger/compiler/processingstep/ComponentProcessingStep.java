@@ -36,7 +36,7 @@ import autodagger.compiler.message.MessageDelivery;
 import autodagger.compiler.model.spec.ComponentSpec;
 import autodagger.compiler.model.spec.ExposedSpec;
 import autodagger.compiler.model.spec.InjectorSpec;
-import autodagger.compiler.utils.AutoComponentNamePolicy;
+import autodagger.compiler.utils.AutoComponentClassNameUtil;
 import dagger.Provides;
 
 /**
@@ -113,7 +113,7 @@ public class ComponentProcessingStep extends ProcessingStep {
         Preconditions.checkNotNull(exposedExtractors, "Expose extractors cannot be null");
         Preconditions.checkNotNull(targetsTypeMirrors, "Targets type mirrors cannot be null");
 
-        ComponentSpec componentSpec = new ComponentSpec(AutoComponentNamePolicy.getComponentClassName(componentExtractor.getElement()));
+        ComponentSpec componentSpec = new ComponentSpec(AutoComponentClassNameUtil.getComponentClassName(componentExtractor.getElement()));
         componentSpec.setElement(componentExtractor.getElement());
         componentSpec.setScopeAnnotationMirror(componentExtractor.getScopeAnnotationTypeMirror());
 
@@ -153,7 +153,7 @@ public class ComponentProcessingStep extends ProcessingStep {
             for (Map.Entry<TypeMirror, Element> entry : targetsTypeMirrors.entrySet()) {
                 if (ProcessingUtils.compareTypeWithOneOfSeverals(entry.getKey(), typeMirror)) {
                     Element element = entry.getValue();
-                    typeNames.add(AutoComponentNamePolicy.getComponentClassName(element));
+                    typeNames.add(AutoComponentClassNameUtil.getComponentClassName(element));
                     continue loop;
                 }
             }

@@ -10,7 +10,7 @@ import javax.lang.model.element.Element;
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-public class AutoComponentNamePolicy {
+public class AutoComponentClassNameUtil {
 
     public static ClassName getComponentClassName(Element element) {
         String pkg = MoreElements.getPackage(element).getQualifiedName().toString();
