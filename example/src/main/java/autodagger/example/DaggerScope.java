@@ -1,10 +1,11 @@
 package autodagger.example;
 
-import autodagger.AutoInjector;
+import javax.inject.Scope;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-@AutoInjector(MainActivity.class)
-public class ObjectA {
+@Scope
+public @interface DaggerScope {
+    Class<?> value();
 }

@@ -1,71 +1,41 @@
 package autodagger.compiler;
 
 import com.google.auto.service.AutoService;
-import com.google.common.collect.ImmutableSet;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedList;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
 
-import autodagger.compiler.message.MessageDelivery;
-import autodagger.compiler.processingstep.ComponentProcessingStep;
-import autodagger.compiler.processingstep.ExposedProcessingStep;
-import autodagger.compiler.processingstep.InjectorProcessingStep;
-import autodagger.compiler.processingstep.ProcessingStep;
-import autodagger.compiler.processingstep.ProcessingStepBus;
+import processorworkflow.AbstractProcessing;
+import processorworkflow.AbstractProcessor;
+import processorworkflow.Logger;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @AutoService(Processor.class)
-public class AnnotationProcessor extends AbstractProcessor {
-
-    private MessageDelivery messageDelivery = new MessageDelivery();
-    private ProcessingStepBus processingStepBus = new ProcessingStepBus();
-    private Set<ProcessingStep> processingSteps;
-
-    private boolean stop;
+public class AnnotationProcessor extends AbstractProcessor<State> {
 
     @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        processingSteps = new LinkedHashSet<>();
-        processingSteps.add(new InjectorProcessingStep(processingStepBus, messageDelivery));
-        processingSteps.add(new ExposedProcessingStep(processingStepBus));
-        processingSteps.add(new ComponentProcessingStep(processingStepBus, messageDelivery));
+    protected State processingState() {
+        return new State();
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (stop) return false;
-        for (ProcessingStep processingStep : processingSteps) {
-            processingStep.process(processingEnv, roundEnv);
-        }
-        messageDelivery.deliver(processingEnv.getMessager());
-        if (messageDelivery.hasErrors()) {
-            stop = true;
-        }
-
-        return false;
+    protected LinkedList<AbstractProcessing> processings() {
+        LinkedList<AbstractProcessing> processings = new LinkedList<>();
+        processings.add(new TargetsProcessing(elements, types, errors, state));
+        processings.add(new AdditionProcessing(elements, types, errors, state));
+        processings.add(new ComponentProcessing(elements, types, errors, state));
+        return processings;
     }
 
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latestSupported();
+    public AnnotationProcessor() {
+        super();
+
+        // don't forget to disable logging before releasing
+        // find a way to have the boolean set automatically via gradle
+        Logger.init("AutoDagger2 Processor", false);
     }
 
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for (ProcessingStep step : processingSteps) {
-            builder.add(step.annotation().getName());
-        }
-        return builder.build();
-    }
 }

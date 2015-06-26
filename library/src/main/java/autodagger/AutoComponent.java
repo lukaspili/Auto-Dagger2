@@ -22,4 +22,10 @@ public @interface AutoComponent {
      * Default is the class on which the @AutoComponent annotation is applied
      */
     Class<?> target() default void.class;
+
+    /**
+     * Apply modules, dependencies and superinterfaces from a template class that is
+     * itself annotated with @AutoComponent
+     */
+    Class<?> fromTemplate() default void.class;
 }
