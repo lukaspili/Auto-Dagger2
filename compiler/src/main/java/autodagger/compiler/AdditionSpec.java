@@ -24,6 +24,6 @@ public class AdditionSpec {
     }
 
     public enum Type {
-        INJECTOR, EXPOSE, BOTH
+        INJECTOR, EXPOSE
     }
 }

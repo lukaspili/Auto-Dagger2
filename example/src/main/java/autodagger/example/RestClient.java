@@ -2,14 +2,16 @@ package autodagger.example;
 
 import javax.inject.Inject;
 
+import autodagger.AutoExpose;
+
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-@AutoExposeActivity()
-@ScopeActivity()
-public class SomeObject {
+@AutoExpose(MyApp.class)
+@DaggerScope(MyApp.class)
+public class RestClient {
 
     @Inject
-    public SomeObject() {
+    public RestClient() {
     }
 }

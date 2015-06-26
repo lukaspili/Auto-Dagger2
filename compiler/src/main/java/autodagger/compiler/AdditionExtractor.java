@@ -1,5 +1,6 @@
 package autodagger.compiler;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +10,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import autodagger.AutoInjector;
 import processorworkflow.AbstractExtractor;
 import processorworkflow.Errors;
 import processorworkflow.ExtractorUtils;
+import processorworkflow.Logger;
 
 /**
  * Extracts @AutoInjector and @AutoExpose
@@ -27,25 +28,30 @@ public class AdditionExtractor extends AbstractExtractor {
      * is applied on the annotation
      */
     private final Element additionElement;
+    private final Class<? extends Annotation> additionAnnotation;
 
     private TypeMirror additionTypeMirror;
     private List<TypeMirror> targetTypeMirrors = new ArrayList<>();
 
-    public AdditionExtractor(Element additionElement, Element element, Types types, Elements elements, Errors errors) {
+    public AdditionExtractor(Element additionElement, Class<? extends Annotation> additionAnnotation, Element element, Types types, Elements elements, Errors errors) {
         super(element, types, elements, errors);
         this.additionElement = additionElement;
+        this.additionAnnotation = additionAnnotation;
+
+        extract();
     }
 
     @Override
-    protected void extract() {
+    public void extract() {
         additionTypeMirror = additionElement.asType();
 
-        List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, AutoInjector.class, "value");
+        List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, additionAnnotation, "value");
         if (values != null && !values.isEmpty()) {
             for (AnnotationValue value : values) {
                 try {
                     TypeMirror tm = (TypeMirror) value.getValue();
                     targetTypeMirrors.add(tm);
+                    Logger.d("Add target TM %s", tm);
                 } catch (Exception e) {
                     errors.addInvalid(e.getMessage());
                     return;
@@ -53,7 +59,7 @@ public class AdditionExtractor extends AbstractExtractor {
             }
         } else {
             // if there's no value, the target is the element itself
-            targetTypeMirrors.add(element.asType());
+            targetTypeMirrors.add(additionElement.asType());
         }
     }
 

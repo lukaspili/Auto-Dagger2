@@ -1,7 +1,9 @@
 package autodagger.compiler;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,8 +20,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import autodagger.AutoComponent;
-import autodagger.AutoInjector;
-import autodagger.compiler.model.spec.InjectorSpec;
 import autodagger.compiler.utils.AutoComponentClassNameUtil;
 import processorworkflow.AbstractComposer;
 import processorworkflow.AbstractProcessing;
@@ -91,81 +91,86 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
 
         @Override
         protected ComponentSpec build() {
-            return null;
-
-            ComponentSpec componentSpec = new ComponentSpec(AutoComponentClassNameUtil.getComponentClassName(extractor.getElement()));
+            ComponentSpec componentSpec = new ComponentSpec(AutoComponentClassNameUtil.getComponentClassName(extractor.getComponentElement()));
             componentSpec.setTargetTypeName(TypeName.get(extractor.getTargetTypeMirror()));
-            componentSpec.setScopeAnnotationMirror(extractor.getScopeAnnotationTypeMirror());
+
+            if (extractor.getScopeAnnotationTypeMirror() != null) {
+                componentSpec.setScopeAnnotationSpec(AnnotationSpec.get(extractor.getScopeAnnotationTypeMirror()));
+            }
 
             // injectors
-            componentSpec.setInjectorSpecs(buildInjectorSpecs(componentExtractor, injectorExtractors));
+            componentSpec.setInjectorSpecs(getAdditions(state.getInjectorExtractors()));
 
             // exposed
-            componentSpec.setExposedSpecs(buildExposedSpecs(componentExtractor, exposedExtractors));
+            componentSpec.setExposeSpecs(getAdditions(state.getExposeExtractors()));
 
             // dependencies
-            componentSpec.setDependenciesTypeNames(buildDependenciesTypeNames(componentExtractor.getDependenciesTypeMirrors(), targetsTypeMirrors));
+            componentSpec.setDependenciesTypeNames(getDependencies());
 
             // superinterfaces
-            componentSpec.setSuperinterfacesTypeNames(buildDependenciesTypeNames(componentExtractor.getSuperinterfacesTypeMirrors(), targetsTypeMirrors));
+            componentSpec.setSuperinterfacesTypeNames(getTypeNames(extractor.getSuperinterfacesTypeMirrors()));
 
-            List<TypeName> modulesTypeNames = new ArrayList<>();
-            if (componentExtractor.getModulesTypeMirrors() != null) {
-                for (TypeMirror typeMirror : componentExtractor.getModulesTypeMirrors()) {
-                    modulesTypeNames.add(TypeName.get(typeMirror));
-                }
-            }
-            componentSpec.setModulesTypeNames(modulesTypeNames);
+            // modules
+            componentSpec.setModulesTypeNames(getTypeNames(extractor.getModulesTypeMirrors()));
+
+            return componentSpec;
         }
 
-        private List<AdditionSpec> getAdditions() {
+        private List<AdditionSpec> getAdditions(List<AdditionExtractor> extractors) {
+            List<AdditionSpec> specs = new ArrayList<>();
 
-            for (AdditionExtractor additionExtractor : state.getInjectorExtractors()) {
+            // for each additions
+            for (AdditionExtractor additionExtractor : extractors) {
+                // for each targets in those additions
                 for (TypeMirror typeMirror : additionExtractor.getTargetTypeMirrors()) {
-                    if (!ProcessingUtils.areTypesEqual(extractor.getTargetTypeMirror(), typeMirror)) {
-                        // this component is not targeted by this addition
-                        continue;
-                    }
+                    // find if that target is a target for the current component
+                    if (ProcessingUtils.areTypesEqual(extractor.getTargetTypeMirror(), typeMirror)) {
+                        // this component is targeted by this addition
+                        Element additionElement = MoreTypes.asElement(additionExtractor.getAdditionTypeMirror());
+                        String name = StringUtils.uncapitalize(additionElement.getSimpleName().toString());
+                        TypeName typeName = TypeName.get(additionExtractor.getAdditionTypeMirror());
 
-                    String name = StringUtils.uncapitalize(extractor.getElement().getSimpleName().toString());
-                    injectorSpecs.add(new InjectorSpec(name, TypeName.get(extractor.getElement().asType())));
+                        AdditionSpec spec = new AdditionSpec(name, typeName);
+                        specs.add(spec);
+                    }
                 }
             }
 
+            return specs;
+        }
 
-            List<InjectorSpec> injectorSpecs = new ArrayList<>();
+        private List<TypeName> getDependencies() {
+            List<TypeName> typeNames = new ArrayList<>();
+            if (extractor.getDependenciesTypeMirrors() == null) {
+                return typeNames;
+            }
 
-            for (AdditionExtractor extractor : state.getInjectorExtractors()) {
-                // empty @AutoInjector must be on same target
-                // compare on both element and target element in order to show correct error message
-                if (extractor.getTargetTypeMirrors().isEmpty() &&
-                        ProcessingUtils.compareTypeWithOneOfSeverals(extractor.getElement().asType(), componentExtractor.getTargetTypeMirror(), componentExtractor.getElement().asType())) {
-
-                    // applies on target
-                    if (!validateEmptyAutoAnnotation(componentExtractor, extractor.getElement(), AutoInjector.class)) {
-                        continue;
-                    }
-                }
-
-                // without value
-                if (extractor.getTargetTypeMirrors().isEmpty() &&
-                        ProcessingUtils.compareTypeWithOneOfSeverals(componentExtractor.getTargetTypeMirror(), extractor.getElement().asType())) {
-                    String name = StringUtils.uncapitalize(extractor.getElement().getSimpleName().toString());
-                    injectorSpecs.add(new InjectorSpec(name, TypeName.get(extractor.getElement().asType())));
+            for (TypeMirror typeMirror : extractor.getDependenciesTypeMirrors()) {
+                // check if dependency type mirror references an @AutoComponent target
+                // if so, build the TypeName that matches the target component
+                if (state.getTargets().contains(typeMirror)) {
+                    Element targetElement = MoreTypes.asElement(typeMirror);
+                    typeNames.add(AutoComponentClassNameUtil.getComponentClassName(targetElement));
                     continue;
                 }
 
-                if (!extractor.getTargetTypeMirrors().isEmpty()) {
-                    for (TypeMirror typeMirror : extractor.getTargetTypeMirrors()) {
-                        if (ProcessingUtils.compareTypeWithOneOfSeverals(componentExtractor.getTargetTypeMirror(), typeMirror)) {
-                            String name = StringUtils.uncapitalize(extractor.getElement().getSimpleName().toString());
-                            injectorSpecs.add(new InjectorSpec(name, TypeName.get(extractor.getElement().asType())));
-                        }
-                    }
-                }
+                typeNames.add(TypeName.get(typeMirror));
             }
 
-            return injectorSpecs;
+            return typeNames;
+        }
+
+        private List<TypeName> getTypeNames(List<TypeMirror> typeMirrors) {
+            List<TypeName> typeNames = new ArrayList<>();
+            if (typeMirrors == null) {
+                return typeNames;
+            }
+
+            for (TypeMirror typeMirror : typeMirrors) {
+                typeNames.add(TypeName.get(typeMirror));
+            }
+
+            return typeNames;
         }
     }
 }

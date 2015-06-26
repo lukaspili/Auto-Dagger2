@@ -46,10 +46,12 @@ public class ComponentExtractor extends AbstractExtractor {
     public ComponentExtractor(Element componentElement, Element element, Types types, Elements elements, Errors errors) {
         super(element, types, elements, errors);
         this.componentElement = componentElement;
+
+        extract();
     }
 
     @Override
-    protected void extract() {
+    public void extract() {
         targetTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_TARGET);
         if (targetTypeMirror == null) {
             targetTypeMirror = componentElement.asType();
@@ -96,6 +98,18 @@ public class ComponentExtractor extends AbstractExtractor {
      * Throw error if more than one scope annotation found
      */
     private AnnotationMirror findScope() {
+        // first look on the @AutoComponent annotated element
+        AnnotationMirror annotationMirror = findScope(element);
+        if (annotationMirror == null && element != componentElement) {
+            // look also on the real component element, if @AutoComponent is itself on
+            // an another annotation
+            annotationMirror = findScope(componentElement);
+        }
+
+        return annotationMirror;
+    }
+
+    private AnnotationMirror findScope(Element element) {
         AnnotationMirror annotationTypeMirror = null;
 
         for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
@@ -103,7 +117,7 @@ public class ComponentExtractor extends AbstractExtractor {
             if (MoreElements.isAnnotationPresent(annotationElement, Scope.class)) {
                 // already found one scope
                 if (annotationTypeMirror != null) {
-                    errors.addInvalid("Class annotated with @AutoComponent cannot have several scopes (@Scope).");
+                    errors.getParent().addInvalid(element, "Class annotated with @AutoComponent cannot have several scopes (@Scope).");
                     continue;
                 }
 
@@ -121,6 +135,10 @@ public class ComponentExtractor extends AbstractExtractor {
         }
 
         return true;
+    }
+
+    public Element getComponentElement() {
+        return componentElement;
     }
 
     public TypeMirror getTargetTypeMirror() {

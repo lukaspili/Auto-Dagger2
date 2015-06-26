@@ -3,7 +3,9 @@ package autodagger.compiler;
 import com.google.common.collect.ImmutableList;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
@@ -17,7 +19,7 @@ public class State extends AbstractState {
 
     private final Map<Element, AdditionExtractor> injectorExtractors = new HashMap<>();
     private final Map<Element, AdditionExtractor> exposeExtractors = new HashMap<>();
-    private final Map<TypeMirror, Element> componentTargets = new HashMap<>();
+    private final Set<TypeMirror> targets = new HashSet<>();
 
     public void addInjectorExtractor(AdditionExtractor extractor) {
         if (injectorExtractors.containsKey(extractor.getElement())) {
@@ -43,7 +45,7 @@ public class State extends AbstractState {
         return ImmutableList.copyOf(exposeExtractors.values());
     }
 
-    public Map<TypeMirror, Element> getComponentTargets() {
-        return componentTargets;
+    public Set<TypeMirror> getTargets() {
+        return targets;
     }
 }

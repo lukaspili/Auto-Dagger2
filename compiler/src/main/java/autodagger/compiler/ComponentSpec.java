@@ -1,14 +1,10 @@
 package autodagger.compiler;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
 import java.util.List;
-
-import javax.lang.model.element.AnnotationMirror;
-
-import autodagger.compiler.model.spec.ExposedSpec;
-import autodagger.compiler.model.spec.InjectorSpec;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
@@ -17,15 +13,19 @@ public class ComponentSpec {
 
     private final ClassName className;
     private TypeName targetTypeName;
-    private List<InjectorSpec> injectorSpecs;
-    private List<ExposedSpec> exposedSpecs;
+    private AnnotationSpec scopeAnnotationSpec;
+    private List<AdditionSpec> injectorSpecs;
+    private List<AdditionSpec> exposeSpecs;
     private List<TypeName> dependenciesTypeNames;
     private List<TypeName> modulesTypeNames;
     private List<TypeName> superinterfacesTypeNames;
-    private AnnotationMirror scopeAnnotationMirror;
 
     public ComponentSpec(ClassName className) {
         this.className = className;
+    }
+
+    public ClassName getClassName() {
+        return className;
     }
 
     public TypeName getTargetTypeName() {
@@ -36,20 +36,28 @@ public class ComponentSpec {
         this.targetTypeName = targetTypeName;
     }
 
-    public List<InjectorSpec> getInjectorSpecs() {
+    public AnnotationSpec getScopeAnnotationSpec() {
+        return scopeAnnotationSpec;
+    }
+
+    public void setScopeAnnotationSpec(AnnotationSpec scopeAnnotationSpec) {
+        this.scopeAnnotationSpec = scopeAnnotationSpec;
+    }
+
+    public List<AdditionSpec> getInjectorSpecs() {
         return injectorSpecs;
     }
 
-    public void setInjectorSpecs(List<InjectorSpec> injectorSpecs) {
+    public void setInjectorSpecs(List<AdditionSpec> injectorSpecs) {
         this.injectorSpecs = injectorSpecs;
     }
 
-    public List<ExposedSpec> getExposedSpecs() {
-        return exposedSpecs;
+    public List<AdditionSpec> getExposeSpecs() {
+        return exposeSpecs;
     }
 
-    public void setExposedSpecs(List<ExposedSpec> exposedSpecs) {
-        this.exposedSpecs = exposedSpecs;
+    public void setExposeSpecs(List<AdditionSpec> exposeSpecs) {
+        this.exposeSpecs = exposeSpecs;
     }
 
     public List<TypeName> getDependenciesTypeNames() {
@@ -74,13 +82,5 @@ public class ComponentSpec {
 
     public void setSuperinterfacesTypeNames(List<TypeName> superinterfacesTypeNames) {
         this.superinterfacesTypeNames = superinterfacesTypeNames;
-    }
-
-    public AnnotationMirror getScopeAnnotationMirror() {
-        return scopeAnnotationMirror;
-    }
-
-    public void setScopeAnnotationMirror(AnnotationMirror scopeAnnotationMirror) {
-        this.scopeAnnotationMirror = scopeAnnotationMirror;
     }
 }
