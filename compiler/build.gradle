@@ -1,19 +1,32 @@
 apply plugin: 'java'
+apply plugin: 'idea'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
+configurations {
+    provided
+    provided.extendsFrom(compile)
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+    }
+}
+
 dependencies {
     compile project(':library')
     compile project(':compiler-utils')
+    compile 'com.github.lukaspili.processor-workflow:processor-workflow:0.8-SNAPSHOT'
 
-    compile 'com.google.auto:auto-common:0.4'
-    compile 'com.google.auto.service:auto-service:1.0-rc2'
-    compile 'com.google.guava:guava:18.0'
-    compile 'com.squareup:javapoet:1.1.0'
-    compile 'org.apache.commons:commons-lang3:3.4'
-
-    compile deps.dagger2
+    provided deps.dagger2
 }
 
 apply from: '../mvn-publish.gradle'
