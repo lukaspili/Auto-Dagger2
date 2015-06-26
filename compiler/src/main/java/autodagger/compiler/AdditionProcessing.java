@@ -84,10 +84,8 @@ public class AdditionProcessing extends AbstractProcessing<AdditionSpec, State> 
         Preconditions.checkArgument(!extractor.getTargetTypeMirrors().isEmpty(), "Addition target cannot be empty");
 
         if (processedAnnotation.equals(AutoInjector.class)) {
-            Logger.d("Add to Injectors");
             state.addInjectorExtractor(extractor);
         } else {
-            Logger.d("Add to Exposes");
             state.addExposeExtractor(extractor);
         }
 

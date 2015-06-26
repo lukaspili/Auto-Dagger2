@@ -4,6 +4,8 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
 import org.apache.commons.lang3.StringUtils;
@@ -124,11 +126,24 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
                 // for each targets in those additions
                 for (TypeMirror typeMirror : additionExtractor.getTargetTypeMirrors()) {
                     // find if that target is a target for the current component
+                    // happens only 1 time per loop
                     if (ProcessingUtils.areTypesEqual(extractor.getTargetTypeMirror(), typeMirror)) {
                         // this component is targeted by this addition
-                        Element additionElement = MoreTypes.asElement(additionExtractor.getAdditionTypeMirror());
-                        String name = StringUtils.uncapitalize(additionElement.getSimpleName().toString());
-                        TypeName typeName = TypeName.get(additionExtractor.getAdditionTypeMirror());
+                        String name = StringUtils.uncapitalize(additionExtractor.getAdditionElement().getSimpleName().toString());
+                        TypeName typeName;
+                        ClassName className = ClassName.get(additionExtractor.getAdditionElement());
+                        if (additionExtractor.getParameterizedTypeMirrors().isEmpty()) {
+                            typeName = className;
+                        } else {
+                            // with parameterized types
+                            TypeName[] types = new TypeName[additionExtractor.getParameterizedTypeMirrors().size()];
+                            int i = 0;
+                            for (TypeMirror tm : additionExtractor.getParameterizedTypeMirrors()) {
+                                types[i++] = TypeName.get(tm);
+                            }
+
+                            typeName = ParameterizedTypeName.get(className, types);
+                        }
 
                         AdditionSpec spec = new AdditionSpec(name, typeName);
                         specs.add(spec);

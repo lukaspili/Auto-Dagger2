@@ -7,6 +7,7 @@ import autodagger.AutoComponent;
 import autodagger.AutoInjector;
 import dagger.Component;
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
@@ -37,6 +38,11 @@ public class SecondActivity extends Activity {
     @Module
     public static class ModuleOne {
 
+        @Provides
+        @DaggerScope(SecondActivity.class)
+        public MyObject2<String, String> providesMyObject2() {
+            return new MyObject2<>();
+        }
     }
 
     @Module

@@ -13,4 +13,6 @@ import java.lang.annotation.Target;
 public @interface AutoExpose {
 
     Class<?>[] value() default void.class;
+
+    Class<?>[] parameterizedTypes() default void.class;
 }

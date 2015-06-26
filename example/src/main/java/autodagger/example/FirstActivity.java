@@ -6,6 +6,7 @@ import android.os.Bundle;
 import autodagger.AutoComponent;
 import autodagger.AutoInjector;
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
@@ -36,6 +37,17 @@ public class FirstActivity extends Activity {
     @Module
     public static class ModuleOne {
 
+        @Provides
+        @DaggerScope(FirstActivity.class)
+        public MyObject2<String, String> providesMyObject2() {
+            return new MyObject2<>();
+        }
+
+        @Provides
+        @DaggerScope(FirstActivity.class)
+        public MyObject3 providesMyObject3() {
+            return new MyObject3<>();
+        }
     }
 
     @Module
