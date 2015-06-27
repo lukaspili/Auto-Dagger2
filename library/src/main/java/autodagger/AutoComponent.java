@@ -1,5 +1,6 @@
 package autodagger;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,8 +25,8 @@ public @interface AutoComponent {
     Class<?> target() default void.class;
 
     /**
-     * Apply modules, dependencies and superinterfaces from a template class that is
+     * Apply modules, dependencies and superinterfaces from a template annotation class that is
      * itself annotated with @AutoComponent
      */
-    Class<?> fromTemplate() default void.class;
+    Class<? extends Annotation> fromTemplate() default Annotation.class;
 }

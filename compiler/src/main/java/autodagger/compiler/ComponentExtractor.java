@@ -1,6 +1,7 @@
 package autodagger.compiler;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,6 @@ public class ComponentExtractor extends AbstractExtractor {
     private final Element componentElement;
 
     private TypeMirror targetTypeMirror;
-    private TypeMirror fromTemplateTypeMirror;
     private List<TypeMirror> dependenciesTypeMirrors;
     private List<TypeMirror> modulesTypeMirrors;
     private List<TypeMirror> superinterfacesTypeMirrors;
@@ -57,16 +57,32 @@ public class ComponentExtractor extends AbstractExtractor {
             targetTypeMirror = componentElement.asType();
         }
 
-        fromTemplateTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_FROM_TEMPLATE);
-        dependenciesTypeMirrors = findTypeMirrors(element, ANNOTATION_DEPENDENCIES);
-        modulesTypeMirrors = findTypeMirrors(element, ANNOTATION_MODULES);
-        superinterfacesTypeMirrors = findTypeMirrors(element, ANNOTATION_SUPERINTERFACES);
-        scopeAnnotationTypeMirror = findScope();
+        ComponentExtractor templateExtractor = null;
+        TypeMirror fromTemplateTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_FROM_TEMPLATE);
+        if (fromTemplateTypeMirror != null) {
+            Element templateElement = MoreTypes.asElement(fromTemplateTypeMirror);
+            if (!MoreElements.isAnnotationPresent(templateElement, AutoComponent.class)) {
+                errors.getParent().addInvalid(templateElement, "Template must be annotated with @AutoComponent");
+                return;
+            }
 
-        if (fromTemplateTypeMirror != null &&
-                (!dependenciesTypeMirrors.isEmpty() || !modulesTypeMirrors.isEmpty() || !superinterfacesTypeMirrors.isEmpty())) {
-            errors.addInvalid("Cannot have fromTemplate with dependencies/superinterfaces/modules at the same time");
+            templateExtractor = new ComponentExtractor(templateElement, templateElement, types, elements, errors.getParent());
+            if (errors.getParent().hasErrors()) {
+                return;
+            }
         }
+
+        if (templateExtractor == null) {
+            dependenciesTypeMirrors = findTypeMirrors(element, ANNOTATION_DEPENDENCIES);
+            modulesTypeMirrors = findTypeMirrors(element, ANNOTATION_MODULES);
+            superinterfacesTypeMirrors = findTypeMirrors(element, ANNOTATION_SUPERINTERFACES);
+        } else {
+            dependenciesTypeMirrors = templateExtractor.getDependenciesTypeMirrors();
+            modulesTypeMirrors = templateExtractor.getModulesTypeMirrors();
+            superinterfacesTypeMirrors = templateExtractor.getSuperinterfacesTypeMirrors();
+        }
+
+        scopeAnnotationTypeMirror = findScope();
     }
 
     private List<TypeMirror> findTypeMirrors(Element element, String name) {

@@ -3,25 +3,26 @@ package autodagger.example;
 import android.app.Activity;
 import android.os.Bundle;
 
+import autodagger.AutoComponent;
 import autodagger.AutoInjector;
 
 /**
- * Showcase: @AutoComponent from annotation
+ * Showcase: @AutoComponent fromTemplate
  *
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-@StandardActivityComponent1
+@AutoComponent(fromTemplate = StandardActivityComponent1.class)
+@DaggerScope(SixthActivity.class)
 @AutoInjector
-@DaggerScope(ThirdActivity.class)
-public class ThirdActivity extends Activity {
+public class SixthActivity extends Activity {
 
-    private ThirdActivityComponent component;
+    private SixthActivityComponent component;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        component = DaggerThirdActivityComponent.builder()
+        component = DaggerSixthActivityComponent.builder()
                 .myAppComponent(((MyApp) getApplication()).getComponent())
                 .build();
         component.inject(this);

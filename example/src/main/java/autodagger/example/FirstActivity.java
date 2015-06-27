@@ -9,6 +9,8 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
+ * Showcase: @AutoComponent
+ *
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @AutoComponent(

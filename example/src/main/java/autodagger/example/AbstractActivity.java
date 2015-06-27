@@ -13,7 +13,7 @@ import autodagger.AutoInjector;
 @DaggerScope(AbstractActivity.class)
 public abstract class AbstractActivity extends Activity {
 
-    private AbstractActivityComponent component;
+    protected AbstractActivityComponent component;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

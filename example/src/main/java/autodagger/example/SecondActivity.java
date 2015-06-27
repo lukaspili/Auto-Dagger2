@@ -10,6 +10,8 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
+ * Showcase: @AutoComponent dependencies from manually written dagger component
+ *
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @AutoComponent(

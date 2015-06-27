@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 
 /**
+ * Showcase: @AutoComponent from annotation
+ *
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 @StandardActivityComponent2

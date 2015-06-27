@@ -4,7 +4,7 @@ import autodagger.AutoExpose;
 import autodagger.AutoInjector;
 
 /**
- * With parameterized types
+ * Showcase: With parameterized types, but exposes only raw type
  *
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
