@@ -35,7 +35,7 @@ public class AnnotationProcessor extends AbstractProcessor<State> {
 
         // don't forget to disable logging before releasing
         // find a way to have the boolean set automatically via gradle
-        Logger.init("AutoDagger2 Processor", true);
+        Logger.init("AutoDagger2 Processor", false);
     }
 
 }
