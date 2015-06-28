@@ -58,10 +58,13 @@ public class ComponentComposer extends AbstractComposer<ComponentSpec> {
         }
 
         for (AdditionSpec additionSpec : componentSpec.getExposeSpecs()) {
-            builder.addMethod(MethodSpec.methodBuilder(additionSpec.getName())
+            MethodSpec.Builder exposeBuilder = MethodSpec.methodBuilder(additionSpec.getName())
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .returns(additionSpec.getTypeName())
-                    .build());
+                    .returns(additionSpec.getTypeName());
+            if (additionSpec.getQualifierAnnotationSpec() != null) {
+                exposeBuilder.addAnnotation(additionSpec.getQualifierAnnotationSpec());
+            }
+            builder.addMethod(exposeBuilder.build());
         }
 
         TypeSpec typeSpec = builder.build();

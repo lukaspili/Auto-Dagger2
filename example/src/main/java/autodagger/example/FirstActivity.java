@@ -3,7 +3,10 @@ package autodagger.example;
 import android.app.Activity;
 import android.os.Bundle;
 
+import javax.inject.Named;
+
 import autodagger.AutoComponent;
+import autodagger.AutoExpose;
 import autodagger.AutoInjector;
 import dagger.Module;
 import dagger.Provides;
@@ -49,6 +52,22 @@ public class FirstActivity extends Activity {
         @DaggerScope(FirstActivity.class)
         public MyObject3 providesMyObject3() {
             return new MyObject3<>();
+        }
+
+        @Provides
+        @DaggerScope(FirstActivity.class)
+        @Named("1")
+        @AutoExpose(FirstActivity.class)
+        public MyObject4 providesMyObject4Qualifier1() {
+            return new MyObject4();
+        }
+
+        @Provides
+        @DaggerScope(FirstActivity.class)
+        @Named("2")
+        @AutoExpose(FirstActivity.class)
+        public MyObject4 providesMyObject4Qualifier2() {
+            return new MyObject4();
         }
     }
 

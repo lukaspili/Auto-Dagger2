@@ -127,9 +127,24 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
                 for (TypeMirror typeMirror : additionExtractor.getTargetTypeMirrors()) {
                     // find if that target is a target for the current component
                     // happens only 1 time per loop
-                    if (ProcessingUtils.areTypesEqual(extractor.getTargetTypeMirror(), typeMirror)) {
+                    if (ProcessingUtil.areTypesEqual(extractor.getTargetTypeMirror(), typeMirror)) {
                         // this component is targeted by this addition
-                        String name = StringUtils.uncapitalize(additionExtractor.getAdditionElement().getSimpleName().toString());
+
+                        String name;
+                        if (additionExtractor.getProviderMethodName() != null) {
+                            name = additionExtractor.getProviderMethodName();
+
+                            // try to remove "provide" or "provides" from name
+                            if (StringUtils.startsWith(name, "provides")) {
+                                name = StringUtils.removeStart(name, "provides");
+                            } else if (StringUtils.startsWith(name, "provide")) {
+                                name = StringUtils.removeStart(name, "provide");
+                            }
+                            name = StringUtils.uncapitalize(name);
+                        } else {
+                            name = StringUtils.uncapitalize(additionExtractor.getAdditionElement().getSimpleName().toString());
+                        }
+
                         TypeName typeName;
                         ClassName className = ClassName.get(additionExtractor.getAdditionElement());
                         if (additionExtractor.getParameterizedTypeMirrors().isEmpty()) {
@@ -146,6 +161,12 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
                         }
 
                         AdditionSpec spec = new AdditionSpec(name, typeName);
+
+                        // add qualifier if it exists
+                        if (additionExtractor.getQualifierAnnotationMirror() != null) {
+                            spec.setQualifierAnnotationSpec(AnnotationSpec.get(additionExtractor.getQualifierAnnotationMirror()));
+                        }
+
                         specs.add(spec);
                     }
                 }

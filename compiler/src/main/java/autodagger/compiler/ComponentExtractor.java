@@ -126,22 +126,17 @@ public class ComponentExtractor extends AbstractExtractor {
     }
 
     private AnnotationMirror findScope(Element element) {
-        AnnotationMirror annotationTypeMirror = null;
-
-        for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
-            Element annotationElement = annotationMirror.getAnnotationType().asElement();
-            if (MoreElements.isAnnotationPresent(annotationElement, Scope.class)) {
-                // already found one scope
-                if (annotationTypeMirror != null) {
-                    errors.getParent().addInvalid(element, "Class annotated with @AutoComponent cannot have several scopes (@Scope).");
-                    continue;
-                }
-
-                annotationTypeMirror = annotationMirror;
-            }
+        List<AnnotationMirror> annotationMirrors = ExtractorUtil.findAnnotatedAnnotation(element, Scope.class);
+        if (annotationMirrors.isEmpty()) {
+            return null;
         }
 
-        return annotationTypeMirror;
+        if (annotationMirrors.size() > 1) {
+            errors.getParent().addInvalid(element, "Cannot have several scope (@Scope).");
+            return null;
+        }
+
+        return annotationMirrors.get(0);
     }
 
     private boolean validateAnnotationValue(AnnotationValue value, String member) {

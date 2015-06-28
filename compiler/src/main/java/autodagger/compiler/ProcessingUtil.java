@@ -10,7 +10,7 @@ import javax.lang.model.type.TypeMirror;
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-final class ProcessingUtils {
+final class ProcessingUtil {
 
     /**
      * Types.isSameType() does not work when the origin element that triggers annotation
@@ -27,28 +27,4 @@ final class ProcessingUtils {
 
         return typeElement1.getQualifiedName().equals(typeElement2.getQualifiedName());
     }
-
-
-    /**
-     * See compareTypeElements() doc for explanation of workaround
-     *
-     * @return If one type equals return true, false otherwise
-     */
-    public static boolean compareTypeWithOneOfSeverals(TypeMirror typeMirror, TypeMirror... severals) {
-        Element element = MoreTypes.asElement(typeMirror);
-        TypeElement typeElement = MoreElements.asType(element);
-
-        for (TypeMirror tm : severals) {
-            Element e = MoreTypes.asElement(tm);
-            TypeElement te = MoreElements.asType(e);
-
-            if (typeElement.getQualifiedName().equals(te.getQualifiedName())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
 }

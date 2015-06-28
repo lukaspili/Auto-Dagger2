@@ -6,13 +6,17 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Qualifier;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import autodagger.AutoExpose;
 import processorworkflow.AbstractExtractor;
 import processorworkflow.Errors;
 import processorworkflow.ExtractorUtils;
@@ -32,6 +36,8 @@ public class AdditionExtractor extends AbstractExtractor {
     private TypeElement additionElement;
     private final Class<? extends Annotation> additionAnnotation;
 
+    private String providerMethodName;
+    private AnnotationMirror qualifierAnnotationMirror;
     private List<TypeMirror> targetTypeMirrors;
     private List<TypeMirror> parameterizedTypeMirrors;
 
@@ -58,6 +64,26 @@ public class AdditionExtractor extends AbstractExtractor {
         }
 
         parameterizedTypeMirrors = getTypeMirrors("parameterizedTypes");
+
+        // @AutoExpose on provider method can have qualifier
+        if (additionAnnotation.equals(AutoExpose.class) && element.getKind() == ElementKind.METHOD) {
+            qualifierAnnotationMirror = findQualifier(element);
+            providerMethodName = element.getSimpleName().toString();
+        }
+    }
+
+    private AnnotationMirror findQualifier(Element element) {
+        List<AnnotationMirror> annotationMirrors = ExtractorUtil.findAnnotatedAnnotation(element, Qualifier.class);
+        if (annotationMirrors.isEmpty()) {
+            return null;
+        }
+
+        if (annotationMirrors.size() > 1) {
+            errors.getParent().addInvalid(element, "Cannot have several qualifiers (@Qualifier).");
+            return null;
+        }
+
+        return annotationMirrors.get(0);
     }
 
     private List<TypeMirror> getTypeMirrors(String member) {
@@ -81,6 +107,14 @@ public class AdditionExtractor extends AbstractExtractor {
 
     public TypeElement getAdditionElement() {
         return additionElement;
+    }
+
+    public String getProviderMethodName() {
+        return providerMethodName;
+    }
+
+    public AnnotationMirror getQualifierAnnotationMirror() {
+        return qualifierAnnotationMirror;
     }
 
     public List<TypeMirror> getTargetTypeMirrors() {
