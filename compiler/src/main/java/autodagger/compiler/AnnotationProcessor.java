@@ -24,7 +24,6 @@ public class AnnotationProcessor extends AbstractProcessor<State> {
     @Override
     protected LinkedList<AbstractProcessing> processings() {
         LinkedList<AbstractProcessing> processings = new LinkedList<>();
-        processings.add(new TargetsProcessing(elements, types, errors, state));
         processings.add(new AdditionProcessing(elements, types, errors, state));
         processings.add(new ComponentProcessing(elements, types, errors, state));
         return processings;

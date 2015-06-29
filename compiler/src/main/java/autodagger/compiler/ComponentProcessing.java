@@ -1,7 +1,6 @@
 package autodagger.compiler;
 
 import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -12,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +26,7 @@ import autodagger.compiler.utils.AutoComponentClassNameUtil;
 import processorworkflow.AbstractComposer;
 import processorworkflow.AbstractProcessing;
 import processorworkflow.Errors;
+import processorworkflow.Logger;
 import processorworkflow.ProcessingBuilder;
 
 /**
@@ -33,14 +34,31 @@ import processorworkflow.ProcessingBuilder;
  */
 public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State> {
 
+    /**
+     * Build all extractors first, then build all builders, because
+     * we want to gather all targets first
+     */
+    private final Set<ComponentExtractor> extractors;
+
     public ComponentProcessing(Elements elements, Types types, Errors errors, State state) {
         super(elements, types, errors, state);
+        extractors = new HashSet<>();
     }
 
     @Override
     public Set<Class<? extends Annotation>> supportedAnnotations() {
         Set set = ImmutableSet.of(AutoComponent.class);
         return set;
+    }
+
+    @Override
+    protected void processElements(Set<? extends Element> annotationElements) {
+        super.processElements(annotationElements);
+        if (errors.hasErrors()) {
+            return;
+        }
+
+        processExtractors();
     }
 
     @Override
@@ -67,18 +85,27 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
     }
 
     private void process(Element targetElement, Element element) {
+        Logger.d("Process extractor for %s - %s", targetElement.getSimpleName(), element.getSimpleName());
         ComponentExtractor extractor = new ComponentExtractor(targetElement, element, types, elements, errors);
         if (errors.hasErrors()) {
             return;
         }
 
-        ComponentSpec spec = new Builder(extractor, errors).build();
-        if (errors.hasErrors()) {
-            return;
-        }
-
-        specs.add(spec);
+        extractors.add(extractor);
+        Logger.d("Add target %s", extractor.getTargetTypeMirror());
     }
+
+    private void processExtractors() {
+        for (ComponentExtractor extractor : extractors) {
+            ComponentSpec spec = new Builder(extractor, errors).build();
+            if (errors.hasErrors()) {
+                return;
+            }
+
+            specs.add(spec);
+        }
+    }
+
 
     @Override
     public AbstractComposer<ComponentSpec> createComposer() {
@@ -181,13 +208,20 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
                 return typeNames;
             }
 
+            mainLoop:
             for (TypeMirror typeMirror : extractor.getDependenciesTypeMirrors()) {
                 // check if dependency type mirror references an @AutoComponent target
                 // if so, build the TypeName that matches the target component
-                if (state.getTargets().contains(typeMirror)) {
-                    Element targetElement = MoreTypes.asElement(typeMirror);
-                    typeNames.add(AutoComponentClassNameUtil.getComponentClassName(targetElement));
-                    continue;
+                for (ComponentExtractor componentExtractor : extractors) {
+                    if (componentExtractor == extractor) {
+                        // ignore self
+                        continue;
+                    }
+
+                    if (ProcessingUtil.areTypesEqual(componentExtractor.getTargetTypeMirror(), typeMirror)) {
+                        typeNames.add(AutoComponentClassNameUtil.getComponentClassName(componentExtractor.getComponentElement()));
+                        continue mainLoop;
+                    }
                 }
 
                 typeNames.add(TypeName.get(typeMirror));

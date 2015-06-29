@@ -19,7 +19,6 @@ public class State extends AbstractState {
 
     private final Map<Element, AdditionExtractor> injectorExtractors = new HashMap<>();
     private final Map<Element, AdditionExtractor> exposeExtractors = new HashMap<>();
-    private final Set<TypeMirror> targets = new HashSet<>();
 
     public void addInjectorExtractor(AdditionExtractor extractor) {
         if (injectorExtractors.containsKey(extractor.getElement())) {
@@ -43,9 +42,5 @@ public class State extends AbstractState {
 
     public ImmutableList<AdditionExtractor> getExposeExtractors() {
         return ImmutableList.copyOf(exposeExtractors.values());
-    }
-
-    public Set<TypeMirror> getTargets() {
-        return targets;
     }
 }
