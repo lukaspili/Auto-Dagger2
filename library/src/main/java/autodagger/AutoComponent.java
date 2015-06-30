@@ -25,8 +25,8 @@ public @interface AutoComponent {
     Class<?> target() default void.class;
 
     /**
-     * Apply modules, dependencies and superinterfaces from a template annotation class that is
+     * Includes modules, dependencies and superinterfaces from an annotation that is
      * itself annotated with @AutoComponent
      */
-    Class<? extends Annotation> fromTemplate() default Annotation.class;
+    Class<? extends Annotation> includes() default Annotation.class;
 }

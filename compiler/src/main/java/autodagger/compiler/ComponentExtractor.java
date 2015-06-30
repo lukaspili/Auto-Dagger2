@@ -28,7 +28,7 @@ public class ComponentExtractor extends AbstractExtractor {
     static final String ANNOTATION_MODULES = "modules";
     static final String ANNOTATION_TARGET = "target";
     static final String ANNOTATION_SUPERINTERFACES = "superinterfaces";
-    static final String ANNOTATION_FROM_TEMPLATE = "fromTemplate";
+    static final String ANNOTATION_INCLUDES = "includes";
 
     /**
      * The component element represented by @AutoComponent
@@ -57,29 +57,29 @@ public class ComponentExtractor extends AbstractExtractor {
             targetTypeMirror = componentElement.asType();
         }
 
-        ComponentExtractor templateExtractor = null;
-        TypeMirror fromTemplateTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_FROM_TEMPLATE);
-        if (fromTemplateTypeMirror != null) {
-            Element templateElement = MoreTypes.asElement(fromTemplateTypeMirror);
-            if (!MoreElements.isAnnotationPresent(templateElement, AutoComponent.class)) {
-                errors.getParent().addInvalid(templateElement, "Template must be annotated with @AutoComponent");
+        dependenciesTypeMirrors = findTypeMirrors(element, ANNOTATION_DEPENDENCIES);
+        modulesTypeMirrors = findTypeMirrors(element, ANNOTATION_MODULES);
+        superinterfacesTypeMirrors = findTypeMirrors(element, ANNOTATION_SUPERINTERFACES);
+
+        ComponentExtractor includesExtractor = null;
+        TypeMirror includesTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_INCLUDES);
+        if (includesTypeMirror != null) {
+            Element includesElement = MoreTypes.asElement(includesTypeMirror);
+            if (!MoreElements.isAnnotationPresent(includesElement, AutoComponent.class)) {
+                errors.getParent().addInvalid(includesElement, "Included element must be annotated with @AutoComponent");
                 return;
             }
 
-            templateExtractor = new ComponentExtractor(templateElement, templateElement, types, elements, errors.getParent());
+            includesExtractor = new ComponentExtractor(includesElement, includesElement, types, elements, errors.getParent());
             if (errors.getParent().hasErrors()) {
                 return;
             }
         }
 
-        if (templateExtractor == null) {
-            dependenciesTypeMirrors = findTypeMirrors(element, ANNOTATION_DEPENDENCIES);
-            modulesTypeMirrors = findTypeMirrors(element, ANNOTATION_MODULES);
-            superinterfacesTypeMirrors = findTypeMirrors(element, ANNOTATION_SUPERINTERFACES);
-        } else {
-            dependenciesTypeMirrors = templateExtractor.getDependenciesTypeMirrors();
-            modulesTypeMirrors = templateExtractor.getModulesTypeMirrors();
-            superinterfacesTypeMirrors = templateExtractor.getSuperinterfacesTypeMirrors();
+        if (includesExtractor != null) {
+            dependenciesTypeMirrors.addAll(includesExtractor.getDependenciesTypeMirrors());
+            modulesTypeMirrors.addAll(includesExtractor.getModulesTypeMirrors());
+            superinterfacesTypeMirrors.addAll(includesExtractor.getSuperinterfacesTypeMirrors());
         }
 
         scopeAnnotationTypeMirror = findScope();

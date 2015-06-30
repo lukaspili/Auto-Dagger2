@@ -30,7 +30,6 @@ public class AnnotationProcessor extends AbstractProcessor<State> {
     }
 
     public AnnotationProcessor() {
-        super();
 
         // don't forget to disable logging before releasing
         // find a way to have the boolean set automatically via gradle

@@ -7,11 +7,13 @@ import autodagger.AutoComponent;
 import autodagger.AutoInjector;
 
 /**
- * Showcase: @AutoComponent fromTemplate
+ * Showcase: @AutoComponent includes
  *
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-@AutoComponent(fromTemplate = StandardActivityComponent1.class)
+@AutoComponent(
+        modules = SixthActivity.Module.class,
+        includes = StandardActivityComponent1.class)
 @DaggerScope(SixthActivity.class)
 @AutoInjector
 public class SixthActivity extends Activity {
@@ -26,5 +28,10 @@ public class SixthActivity extends Activity {
                 .myAppComponent(((MyApp) getApplication()).getComponent())
                 .build();
         component.inject(this);
+    }
+
+    @dagger.Module
+    public static class Module {
+
     }
 }
