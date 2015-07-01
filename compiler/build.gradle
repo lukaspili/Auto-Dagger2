@@ -1,33 +1,15 @@
 apply plugin: 'java'
-apply plugin: 'idea'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
-
-configurations {
-    provided
-    provided.extendsFrom(compile)
-}
-
-sourceSets {
-    main {
-        compileClasspath += configurations.provided
-    }
-}
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [configurations.provided]
-    }
-}
 
 dependencies {
     compile project(':library')
     compile project(':compiler-utils')
     compile 'com.github.lukaspili.processor-workflow:processor-workflow:1.0.1'
 
-    provided deps.dagger2
-    provided deps.javax_annotation_jsr250
+    compile deps.dagger2
+    compile deps.javax_annotation_jsr250
 }
 
 apply from: '../mvn-publish.gradle'
