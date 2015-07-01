@@ -15,6 +15,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import autodagger.AutoComponent;
+import autodagger.compiler.utils.AutoComponentExtractorUtil;
 import processorworkflow.AbstractExtractor;
 import processorworkflow.Errors;
 import processorworkflow.ExtractorUtils;
@@ -23,12 +24,6 @@ import processorworkflow.ExtractorUtils;
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
 public class ComponentExtractor extends AbstractExtractor {
-
-    static final String ANNOTATION_DEPENDENCIES = "dependencies";
-    static final String ANNOTATION_MODULES = "modules";
-    static final String ANNOTATION_TARGET = "target";
-    static final String ANNOTATION_SUPERINTERFACES = "superinterfaces";
-    static final String ANNOTATION_INCLUDES = "includes";
 
     /**
      * The component element represented by @AutoComponent
@@ -52,17 +47,17 @@ public class ComponentExtractor extends AbstractExtractor {
 
     @Override
     public void extract() {
-        targetTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_TARGET);
+        targetTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, AutoComponentExtractorUtil.ANNOTATION_TARGET);
         if (targetTypeMirror == null) {
             targetTypeMirror = componentElement.asType();
         }
 
-        dependenciesTypeMirrors = findTypeMirrors(element, ANNOTATION_DEPENDENCIES);
-        modulesTypeMirrors = findTypeMirrors(element, ANNOTATION_MODULES);
-        superinterfacesTypeMirrors = findTypeMirrors(element, ANNOTATION_SUPERINTERFACES);
+        dependenciesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_DEPENDENCIES);
+        modulesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_MODULES);
+        superinterfacesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_SUPERINTERFACES);
 
         ComponentExtractor includesExtractor = null;
-        TypeMirror includesTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, ANNOTATION_INCLUDES);
+        TypeMirror includesTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, AutoComponentExtractorUtil.ANNOTATION_INCLUDES);
         if (includesTypeMirror != null) {
             Element includesElement = MoreTypes.asElement(includesTypeMirror);
             if (!MoreElements.isAnnotationPresent(includesElement, AutoComponent.class)) {

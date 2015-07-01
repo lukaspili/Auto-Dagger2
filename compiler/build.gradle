@@ -24,7 +24,7 @@ idea {
 dependencies {
     compile project(':library')
     compile project(':compiler-utils')
-    compile 'com.github.lukaspili.processor-workflow:processor-workflow:1.0.1-SNAPSHOT'
+    compile 'com.github.lukaspili.processor-workflow:processor-workflow:1.0.1'
 
     provided deps.dagger2
     provided deps.javax_annotation_jsr250
