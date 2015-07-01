@@ -220,6 +220,8 @@ If you don't provide scope annotation, the generated component will be unscoped.
 
 ## Installation
 
+Beware that the groupId changed to **com.github.lukaspili.autodagger2**
+
 ```groovy
 buildscript {
     repositories {
@@ -237,6 +239,10 @@ apply plugin: 'com.neenbedankt.android-apt'
 dependencies {
     apt 'com.github.lukaspili.autodagger2:autodagger2-compiler:1.1'
     compile 'com.github.lukaspili.autodagger2:autodagger2:1.1'
+
+    apt 'com.google.dagger:dagger-compiler:2.0.1'
+    compile 'com.google.dagger:dagger:2.0.1'
+    provided 'javax.annotation:jsr250-api:1.0' // Android only
 }
 ```
 
