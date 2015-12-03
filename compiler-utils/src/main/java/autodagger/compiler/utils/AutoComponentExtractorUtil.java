@@ -37,7 +37,7 @@ public class AutoComponentExtractorUtil {
             // includes
             Element includesElement = MoreTypes.asElement(includesTypeMirror);
             if (!MoreElements.isAnnotationPresent(includesElement, AutoComponent.class)) {
-                errors.addInvalid("Included element is missing @AutoComponent annotation");
+                errors.addInvalid("Included element %s is missing @AutoComponent annotation", includesElement.getSimpleName());
                 return deps;
             }
 
@@ -59,7 +59,7 @@ public class AutoComponentExtractorUtil {
                     TypeMirror tm = (TypeMirror) value.getValue();
                     typeMirrors.add(tm);
                 } catch (Exception e) {
-                    errors.addInvalid("@AutoComponent dependency (did your reference an auto generated class? use rather the target class)");
+                    errors.addInvalid("@AutoComponent dependency %s. Did your reference an auto generated class? You must use the target class", value);
                     break;
                 }
             }

@@ -141,7 +141,7 @@ public class ComponentExtractor extends AbstractExtractor {
 
     private boolean validateAnnotationValue(AnnotationValue value, String member) {
         if (!(value.getValue() instanceof TypeMirror)) {
-            errors.addInvalid(String.format("%s cannot reference generated class. Use the class that applies the @AutoComponent annotation.", member));
+            errors.addInvalid("%s cannot reference generated class. Use the class that applies the @AutoComponent annotation", member);
             return false;
         }
 

@@ -54,12 +54,12 @@ public class AdditionProcessing extends AbstractProcessing<AdditionSpec, State> 
         // only valid for @AutoExpose with @Provides
         if (element.getKind() == ElementKind.METHOD) {
             if (processedAnnotation.equals(AutoInjector.class)) {
-                errors.addInvalid(element, "@AutoInjector cannot be applied on a method");
+                errors.addInvalid(element, "@AutoInjector cannot be applied on the method %s", element.getSimpleName());
                 return false;
             }
 
             if (!MoreElements.isAnnotationPresent(element, Provides.class)) {
-                errors.addInvalid(element, "@AutoExpose can be applied on @Provides method only");
+                errors.addInvalid(element, "@AutoExpose can be applied on @Provides method only, %s is missing it", element.getSimpleName());
                 return false;
             }
 

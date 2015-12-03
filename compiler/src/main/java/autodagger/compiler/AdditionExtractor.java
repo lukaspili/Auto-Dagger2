@@ -48,7 +48,7 @@ public class AdditionExtractor extends AbstractExtractor {
         try {
             this.additionElement = MoreElements.asType(additionElement);
         } catch (Exception e) {
-            errors.addInvalid(additionElement, "Must be a class");
+            errors.addInvalid(additionElement, "%s must be a class", additionElement.getSimpleName());
             return;
         }
 
@@ -98,7 +98,7 @@ public class AdditionExtractor extends AbstractExtractor {
                 TypeMirror tm = (TypeMirror) value.getValue();
                 typeMirrors.add(tm);
             } catch (Exception e) {
-                errors.addInvalid(String.format("Cannot extract member %s because %s", member, e.getMessage()));
+                errors.addInvalid("Cannot extract member %s because %s", member, e.getMessage());
             }
         }
 
