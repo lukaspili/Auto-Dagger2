@@ -3,13 +3,17 @@ apply plugin: 'java'
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
 dependencies {
     compile project(':library')
     compile project(':compiler-utils')
-    compile 'com.github.lukaspili.processor-workflow:processor-workflow:1.0.1'
 
     compile deps.dagger2
     compile deps.javax_annotation_jsr250
+    compile deps.processor_workflow
 }
 
 apply from: '../mvn-publish.gradle'

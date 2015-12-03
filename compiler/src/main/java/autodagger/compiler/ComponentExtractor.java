@@ -65,6 +65,11 @@ public class ComponentExtractor extends AbstractExtractor {
                 return;
             }
 
+            if(element.equals(includesElement)) {
+                errors.addInvalid("Auto component %s cannot include himself", element.getSimpleName());
+                return;
+            }
+
             includesExtractor = new ComponentExtractor(includesElement, includesElement, types, elements, errors.getParent());
             if (errors.getParent().hasErrors()) {
                 return;

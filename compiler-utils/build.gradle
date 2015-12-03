@@ -10,7 +10,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
 
     compile project(':library')
-    compile 'com.github.lukaspili.processor-workflow:processor-workflow:1.0.1'
+    compile deps.processor_workflow
 }
 
 apply from: '../mvn-publish.gradle'
