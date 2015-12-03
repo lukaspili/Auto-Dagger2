@@ -1,1 +1,5 @@
-include ':library', ':compiler', ':example', ':compiler-utils'
+include ':library',
+        ':compiler',
+        ':compiler-utils',
+        ':example',
+        ':example-kotlin'
