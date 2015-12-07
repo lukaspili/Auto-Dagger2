@@ -8,4 +8,5 @@ import autodagger.AutoSubcomponent;
 @AutoSubcomponent(addsTo = MyApp.class)
 @DaggerScope(MySubObject1.class)
 public class MySubObject1 {
+
 }
