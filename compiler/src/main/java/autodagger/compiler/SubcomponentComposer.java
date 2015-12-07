@@ -12,52 +12,49 @@ import javax.annotation.Generated;
 import javax.lang.model.element.Modifier;
 
 import dagger.Component;
+import dagger.Subcomponent;
 import processorworkflow.AbstractComposer;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-public class ComponentComposer extends AbstractComposer<ComponentSpec> {
+public class SubcomponentComposer extends AbstractComposer<SubcomponentSpec> {
 
-    public ComponentComposer(List<ComponentSpec> specs) {
+    public SubcomponentComposer(List<SubcomponentSpec> specs) {
         super(specs);
     }
 
     @Override
-    protected JavaFile compose(ComponentSpec componentSpec) {
-        AnnotationSpec.Builder annotationSpecBuilder = AnnotationSpec.builder(Component.class);
+    protected JavaFile compose(SubcomponentSpec subcomponentSpec) {
+        AnnotationSpec.Builder annotationSpecBuilder = AnnotationSpec.builder(Subcomponent.class);
 
-        for (TypeName typeName : componentSpec.getDependenciesTypeNames()) {
-            annotationSpecBuilder.addMember("dependencies", "$T.class", typeName);
-        }
-
-        for (TypeName typeName : componentSpec.getModulesTypeNames()) {
+        for (TypeName typeName : subcomponentSpec.getModulesTypeNames()) {
             annotationSpecBuilder.addMember("modules", "$T.class", typeName);
         }
 
-        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(componentSpec.getClassName().simpleName())
+        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(subcomponentSpec.getClassName().simpleName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Generated.class)
                         .addMember("value", "$S", AnnotationProcessor.class.getName())
                         .build())
                 .addAnnotation(annotationSpecBuilder.build());
 
-        for (TypeName typeName : componentSpec.getSuperinterfacesTypeNames()) {
+        for (TypeName typeName : subcomponentSpec.getSuperinterfacesTypeNames()) {
             builder.addSuperinterface(typeName);
         }
 
-        if (componentSpec.getScopeAnnotationSpec() != null) {
-            builder.addAnnotation(componentSpec.getScopeAnnotationSpec());
+        if (subcomponentSpec.getScopeAnnotationSpec() != null) {
+            builder.addAnnotation(subcomponentSpec.getScopeAnnotationSpec());
         }
 
-        for (AdditionSpec additionSpec : componentSpec.getInjectorSpecs()) {
+        for (AdditionSpec additionSpec : subcomponentSpec.getInjectorSpecs()) {
             builder.addMethod(MethodSpec.methodBuilder("inject")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addParameter(additionSpec.getTypeName(), additionSpec.getName())
                     .build());
         }
 
-        for (AdditionSpec additionSpec : componentSpec.getExposeSpecs()) {
+        for (AdditionSpec additionSpec : subcomponentSpec.getExposeSpecs()) {
             MethodSpec.Builder exposeBuilder = MethodSpec.methodBuilder(additionSpec.getName())
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .returns(additionSpec.getTypeName());
@@ -67,11 +64,7 @@ public class ComponentComposer extends AbstractComposer<ComponentSpec> {
             builder.addMethod(exposeBuilder.build());
         }
 
-        if (!componentSpec.getSubcomponentsMethodSpecs().isEmpty()) {
-            builder.addMethods(componentSpec.getSubcomponentsMethodSpecs());
-        }
-
         TypeSpec typeSpec = builder.build();
-        return JavaFile.builder(componentSpec.getClassName().packageName(), typeSpec).build();
+        return JavaFile.builder(subcomponentSpec.getClassName().packageName(), typeSpec).build();
     }
 }

@@ -2,6 +2,15 @@ package autodagger.compiler;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -26,5 +35,79 @@ final class ProcessingUtil {
         TypeElement typeElement2 = MoreElements.asType(MoreTypes.asElement(typeMirror2));
 
         return typeElement1.getQualifiedName().equals(typeElement2.getQualifiedName());
+    }
+
+    public static List<TypeName> getTypeNames(List<TypeMirror> typeMirrors) {
+        List<TypeName> typeNames = new ArrayList<>();
+        if (typeMirrors == null) {
+            return typeNames;
+        }
+
+        for (TypeMirror typeMirror : typeMirrors) {
+            typeNames.add(TypeName.get(typeMirror));
+        }
+
+        return typeNames;
+    }
+
+    public static List<AdditionSpec> getAdditions(TypeMirror elementTypeMirror, List<AdditionExtractor> extractors) {
+        final List<AdditionSpec> specs = new ArrayList<>();
+
+        // for each additions
+        for (AdditionExtractor additionExtractor : extractors) {
+            // for each targets in those additions
+            for (TypeMirror typeMirror : additionExtractor.getTargetTypeMirrors()) {
+                // find if that target is a target for the current component
+                // happens only 1 time per loop
+                if (ProcessingUtil.areTypesEqual(elementTypeMirror, typeMirror)) {
+                    // this component is targeted by this addition
+
+                    String name;
+                    if (additionExtractor.getProviderMethodName() != null) {
+                        name = additionExtractor.getProviderMethodName();
+
+                        // try to remove "provide" or "provides" from name
+                        if (StringUtils.startsWith(name, "provides")) {
+                            name = StringUtils.removeStart(name, "provides");
+                        } else if (StringUtils.startsWith(name, "provide")) {
+                            name = StringUtils.removeStart(name, "provide");
+                        }
+                        name = StringUtils.uncapitalize(name);
+                    } else {
+                        name = StringUtils.uncapitalize(additionExtractor.getAdditionElement().getSimpleName().toString());
+                    }
+
+                    TypeName typeName;
+                    ClassName className = ClassName.get(additionExtractor.getAdditionElement());
+                    if (additionExtractor.getParameterizedTypeMirrors().isEmpty()) {
+                        typeName = className;
+                    } else {
+                        // with parameterized types
+                        TypeName[] types = new TypeName[additionExtractor.getParameterizedTypeMirrors().size()];
+                        int i = 0;
+                        for (TypeMirror tm : additionExtractor.getParameterizedTypeMirrors()) {
+                            types[i++] = TypeName.get(tm);
+                        }
+
+                        typeName = ParameterizedTypeName.get(className, types);
+                    }
+
+                    AdditionSpec spec = new AdditionSpec(name, typeName);
+
+                    // add qualifier if it exists
+                    if (additionExtractor.getQualifierAnnotationMirror() != null) {
+                        spec.setQualifierAnnotationSpec(AnnotationSpec.get(additionExtractor.getQualifierAnnotationMirror()));
+                    }
+
+                    specs.add(spec);
+                }
+            }
+        }
+
+        return specs;
+    }
+
+    public static List<AdditionSpec> getAdditions(Element element, List<AdditionExtractor> extractors) {
+        return getAdditions(element.asType(), extractors);
     }
 }

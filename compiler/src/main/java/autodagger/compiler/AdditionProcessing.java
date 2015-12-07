@@ -74,8 +74,6 @@ public class AdditionProcessing extends AbstractProcessing<AdditionSpec, State> 
     }
 
     private boolean process(Element targetElement, Element element) {
-        Logger.d("Process %s - %s", targetElement.getSimpleName(), element.getSimpleName());
-
         AdditionExtractor extractor = new AdditionExtractor(targetElement, processedAnnotation, element, types, elements, errors);
         if (errors.hasErrors()) {
             return false;

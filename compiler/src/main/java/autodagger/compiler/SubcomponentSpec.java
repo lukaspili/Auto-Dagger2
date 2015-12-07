@@ -2,41 +2,29 @@ package autodagger.compiler;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
  */
-public class ComponentSpec {
+public class SubcomponentSpec {
 
     private final ClassName className;
-    private TypeName targetTypeName;
     private AnnotationSpec scopeAnnotationSpec;
     private List<AdditionSpec> injectorSpecs;
     private List<AdditionSpec> exposeSpecs;
-    private List<TypeName> dependenciesTypeNames;
+    private List<TypeName> addsToTypeNames;
     private List<TypeName> modulesTypeNames;
     private List<TypeName> superinterfacesTypeNames;
-    private List<MethodSpec> subcomponentsMethodSpecs;
 
-    public ComponentSpec(ClassName className) {
+    public SubcomponentSpec(ClassName className) {
         this.className = className;
     }
 
     public ClassName getClassName() {
         return className;
-    }
-
-    public TypeName getTargetTypeName() {
-        return targetTypeName;
-    }
-
-    public void setTargetTypeName(TypeName targetTypeName) {
-        this.targetTypeName = targetTypeName;
     }
 
     public AnnotationSpec getScopeAnnotationSpec() {
@@ -63,12 +51,12 @@ public class ComponentSpec {
         this.exposeSpecs = exposeSpecs;
     }
 
-    public List<TypeName> getDependenciesTypeNames() {
-        return dependenciesTypeNames;
+    public List<TypeName> getAddsToTypeNames() {
+        return addsToTypeNames;
     }
 
-    public void setDependenciesTypeNames(List<TypeName> dependenciesTypeNames) {
-        this.dependenciesTypeNames = dependenciesTypeNames;
+    public void setAddsToTypeNames(List<TypeName> addsToTypeNames) {
+        this.addsToTypeNames = addsToTypeNames;
     }
 
     public List<TypeName> getModulesTypeNames() {
@@ -85,13 +73,5 @@ public class ComponentSpec {
 
     public void setSuperinterfacesTypeNames(List<TypeName> superinterfacesTypeNames) {
         this.superinterfacesTypeNames = superinterfacesTypeNames;
-    }
-
-    public List<MethodSpec> getSubcomponentsMethodSpecs() {
-        return subcomponentsMethodSpecs;
-    }
-
-    public void setSubcomponentsMethodSpecs(List<MethodSpec> subcomponentsMethodSpecs) {
-        this.subcomponentsMethodSpecs = subcomponentsMethodSpecs;
     }
 }
