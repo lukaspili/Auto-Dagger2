@@ -20,7 +20,7 @@ import dagger.Provides;
         modules = {FirstActivity.ModuleOne.class, FirstActivity.ModuleTwo.class},
         dependencies = MyApp.class,
         superinterfaces = {HasDependenciesOne.class, HasDependenciesTwo.class},
-        subcomponents = {MySubObject1.class, MySubObject2.class}
+        subcomponents = {MySubObject1.class, MySubObject2.class, MyManualSubcomponent.class}
 )
 @AutoInjector
 @DaggerScope(FirstActivity.class)
