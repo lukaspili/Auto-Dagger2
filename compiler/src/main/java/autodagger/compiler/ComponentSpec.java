@@ -21,7 +21,7 @@ public class ComponentSpec {
     private List<TypeName> dependenciesTypeNames;
     private List<TypeName> modulesTypeNames;
     private List<TypeName> superinterfacesTypeNames;
-    private List<MethodSpec> subcomponentsMethodSpecs;
+    private List<MethodSpec> subcomponentsSpecs;
 
     public ComponentSpec(ClassName className) {
         this.className = className;
@@ -87,11 +87,11 @@ public class ComponentSpec {
         this.superinterfacesTypeNames = superinterfacesTypeNames;
     }
 
-    public List<MethodSpec> getSubcomponentsMethodSpecs() {
-        return subcomponentsMethodSpecs;
+    public List<MethodSpec> getSubcomponentsSpecs() {
+        return subcomponentsSpecs;
     }
 
-    public void setSubcomponentsMethodSpecs(List<MethodSpec> subcomponentsMethodSpecs) {
-        this.subcomponentsMethodSpecs = subcomponentsMethodSpecs;
+    public void setSubcomponentsSpecs(List<MethodSpec> subcomponentsSpecs) {
+        this.subcomponentsSpecs = subcomponentsSpecs;
     }
 }

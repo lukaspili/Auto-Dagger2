@@ -26,4 +26,9 @@ public @interface AutoComponent {
      * itself annotated with @AutoComponent
      */
     Class<? extends Annotation> includes() default Annotation.class;
+
+    /**
+     * Subcomponents to be declared inside this component
+     */
+    Class<?>[] subcomponents() default {};
 }

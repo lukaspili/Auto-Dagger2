@@ -1,6 +1,7 @@
 package autodagger.compiler;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -67,8 +68,8 @@ public class ComponentComposer extends AbstractComposer<ComponentSpec> {
             builder.addMethod(exposeBuilder.build());
         }
 
-        if (!componentSpec.getSubcomponentsMethodSpecs().isEmpty()) {
-            builder.addMethods(componentSpec.getSubcomponentsMethodSpecs());
+        if (!componentSpec.getSubcomponentsSpecs().isEmpty()) {
+            builder.addMethods(componentSpec.getSubcomponentsSpecs());
         }
 
         TypeSpec typeSpec = builder.build();

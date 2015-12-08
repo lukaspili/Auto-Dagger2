@@ -15,7 +15,6 @@ public class SubcomponentSpec {
     private AnnotationSpec scopeAnnotationSpec;
     private List<AdditionSpec> injectorSpecs;
     private List<AdditionSpec> exposeSpecs;
-    private List<TypeName> addsToTypeNames;
     private List<TypeName> modulesTypeNames;
     private List<TypeName> superinterfacesTypeNames;
 
@@ -49,14 +48,6 @@ public class SubcomponentSpec {
 
     public void setExposeSpecs(List<AdditionSpec> exposeSpecs) {
         this.exposeSpecs = exposeSpecs;
-    }
-
-    public List<TypeName> getAddsToTypeNames() {
-        return addsToTypeNames;
-    }
-
-    public void setAddsToTypeNames(List<TypeName> addsToTypeNames) {
-        this.addsToTypeNames = addsToTypeNames;
     }
 
     public List<TypeName> getModulesTypeNames() {

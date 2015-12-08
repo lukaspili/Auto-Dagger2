@@ -2,7 +2,6 @@ package autodagger.compiler;
 
 import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
 import processorworkflow.AbstractState;
-import processorworkflow.Logger;
 
 /**
  * @author Lukasz Piliszczuk - lukasz.pili@gmail.com
@@ -20,7 +18,7 @@ public class State extends AbstractState {
 
     private final Map<Element, AdditionExtractor> injectorExtractors = new HashMap<>();
     private final Map<Element, AdditionExtractor> exposeExtractors = new HashMap<>();
-    private final Map<TypeMirror, List<SubcomponentExtractor>> subcomponentExtractors = new HashMap<>();
+    private final Map<TypeMirror, List<TypeMirror>> subcomponentsModules = new HashMap<>();
 
     public void addInjectorExtractor(AdditionExtractor extractor) {
         if (injectorExtractors.containsKey(extractor.getElement())) {
@@ -38,22 +36,8 @@ public class State extends AbstractState {
         exposeExtractors.put(extractor.getElement(), extractor);
     }
 
-    public void addSubcomponentExtractor(SubcomponentExtractor extractor) {
-        for (TypeMirror typeMirror : extractor.getAddsToTypeMirrors()) {
-            addSubcomponentExtractorToComponent(extractor, typeMirror);
-        }
-    }
-
-    private void addSubcomponentExtractorToComponent(SubcomponentExtractor extractor, TypeMirror componentTypeMirror) {
-        List<SubcomponentExtractor> extractors;
-        if (subcomponentExtractors.containsKey(componentTypeMirror)) {
-            extractors = subcomponentExtractors.get(componentTypeMirror);
-        } else {
-            extractors = new ArrayList<>();
-            subcomponentExtractors.put(componentTypeMirror, extractors);
-        }
-
-        extractors.add(extractor);
+    public void addSubcomponentModule(TypeMirror typeMirror, List<TypeMirror> modules) {
+        subcomponentsModules.put(typeMirror, modules);
     }
 
     public ImmutableList<AdditionExtractor> getInjectorExtractors() {
@@ -64,11 +48,11 @@ public class State extends AbstractState {
         return ImmutableList.copyOf(exposeExtractors.values());
     }
 
-    public ImmutableList<SubcomponentExtractor> getSubcomponentExtractors(TypeMirror typeMirror) {
-        if (!subcomponentExtractors.containsKey(typeMirror)) {
+    public ImmutableList<TypeMirror> getSubcomponentModules(TypeMirror typeMirror) {
+        if (!subcomponentsModules.containsKey(typeMirror)) {
             return null;
         }
 
-        return ImmutableList.copyOf(subcomponentExtractors.get(typeMirror));
+        return ImmutableList.copyOf(subcomponentsModules.get(typeMirror));
     }
 }

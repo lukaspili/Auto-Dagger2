@@ -15,7 +15,10 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import autodagger.AutoComponent;
+import autodagger.AutoSubcomponent;
 import autodagger.compiler.utils.AutoComponentExtractorUtil;
+import dagger.Component;
+import dagger.Subcomponent;
 import processorworkflow.AbstractExtractor;
 import processorworkflow.Errors;
 import processorworkflow.ExtractorUtils;
@@ -36,6 +39,7 @@ public class ComponentExtractor extends AbstractExtractor {
     private List<TypeMirror> dependenciesTypeMirrors;
     private List<TypeMirror> modulesTypeMirrors;
     private List<TypeMirror> superinterfacesTypeMirrors;
+    private List<TypeMirror> subcomponentsTypeMirrors;
     private AnnotationMirror scopeAnnotationTypeMirror;
 
     public ComponentExtractor(Element componentElement, Element element, Types types, Elements elements, Errors errors) {
@@ -55,6 +59,7 @@ public class ComponentExtractor extends AbstractExtractor {
         dependenciesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_DEPENDENCIES);
         modulesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_MODULES);
         superinterfacesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_SUPERINTERFACES);
+        subcomponentsTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_SUBCOMPONENTS);
 
         ComponentExtractor includesExtractor = null;
         TypeMirror includesTypeMirror = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, AutoComponentExtractorUtil.ANNOTATION_INCLUDES);
@@ -65,7 +70,7 @@ public class ComponentExtractor extends AbstractExtractor {
                 return;
             }
 
-            if(element.equals(includesElement)) {
+            if (element.equals(includesElement)) {
                 errors.addInvalid("Auto component %s cannot include himself", element.getSimpleName());
                 return;
             }
@@ -80,12 +85,15 @@ public class ComponentExtractor extends AbstractExtractor {
             dependenciesTypeMirrors.addAll(includesExtractor.getDependenciesTypeMirrors());
             modulesTypeMirrors.addAll(includesExtractor.getModulesTypeMirrors());
             superinterfacesTypeMirrors.addAll(includesExtractor.getSuperinterfacesTypeMirrors());
+            subcomponentsTypeMirrors.addAll(includesExtractor.getSubcomponentsTypeMirrors());
         }
 
         scopeAnnotationTypeMirror = findScope();
     }
 
     private List<TypeMirror> findTypeMirrors(Element element, String name) {
+        boolean addsTo = name.equals(AutoComponentExtractorUtil.ANNOTATION_SUBCOMPONENTS);
+
         List<TypeMirror> typeMirrors = new ArrayList<>();
         List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, AutoComponent.class, name);
         if (values != null) {
@@ -96,6 +104,13 @@ public class ComponentExtractor extends AbstractExtractor {
 
                 try {
                     TypeMirror tm = (TypeMirror) value.getValue();
+                    if (addsTo) {
+                        Element e = MoreTypes.asElement(tm);
+                        if (!MoreElements.isAnnotationPresent(e, AutoSubcomponent.class) && !MoreElements.isAnnotationPresent(e, Subcomponent.class)) {
+                            errors.addInvalid("@AutoComponent cannot declare a subcomponent that is not annotated with @Subcomponent or @AutoSubcomponent: %s", e.getSimpleName());
+                            continue;
+                        }
+                    }
                     typeMirrors.add(tm);
                 } catch (Exception e) {
                     errors.addInvalid(e.getMessage());
@@ -166,6 +181,10 @@ public class ComponentExtractor extends AbstractExtractor {
 
     public List<TypeMirror> getSuperinterfacesTypeMirrors() {
         return superinterfacesTypeMirrors;
+    }
+
+    public List<TypeMirror> getSubcomponentsTypeMirrors() {
+        return subcomponentsTypeMirrors;
     }
 
     public AnnotationMirror getScopeAnnotationTypeMirror() {

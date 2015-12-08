@@ -1,7 +1,6 @@
 package autodagger.compiler;
 
 import com.google.auto.common.MoreElements;
-import com.google.auto.common.MoreTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +13,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import autodagger.AutoComponent;
 import autodagger.AutoSubcomponent;
 import autodagger.compiler.utils.AutoComponentExtractorUtil;
-import dagger.Component;
 import processorworkflow.AbstractExtractor;
 import processorworkflow.Errors;
 import processorworkflow.ExtractorUtils;
@@ -27,7 +24,6 @@ import processorworkflow.ExtractorUtils;
  */
 public class SubcomponentExtractor extends AbstractExtractor {
 
-    private List<TypeMirror> addsToTypeMirrors;
     private List<TypeMirror> modulesTypeMirrors;
     private List<TypeMirror> superinterfacesTypeMirrors;
     private AnnotationMirror scopeAnnotationTypeMirror;
@@ -40,21 +36,16 @@ public class SubcomponentExtractor extends AbstractExtractor {
 
     @Override
     public void extract() {
-        addsToTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_ADDSTO);
-        if (addsToTypeMirrors == null || addsToTypeMirrors.isEmpty()) {
-            errors.addInvalid("Subcomponent %s is not added to any parent components", element);
+        modulesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_MODULES);
+        if (!MoreElements.isAnnotationPresent(element, AutoSubcomponent.class)) {
             return;
         }
 
-        modulesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_MODULES);
         superinterfacesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_SUPERINTERFACES);
-
         scopeAnnotationTypeMirror = findScope();
     }
 
     private List<TypeMirror> findTypeMirrors(Element element, String name) {
-        final boolean addsTo = name.equals(AutoComponentExtractorUtil.ANNOTATION_ADDSTO);
-
         List<TypeMirror> typeMirrors = new ArrayList<>();
         List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, AutoSubcomponent.class, name);
         if (values != null) {
@@ -65,14 +56,6 @@ public class SubcomponentExtractor extends AbstractExtractor {
 
                 try {
                     TypeMirror tm = (TypeMirror) value.getValue();
-                    if (addsTo) {
-                        Element e = MoreTypes.asElement(tm);
-                        if (!MoreElements.isAnnotationPresent(e, AutoComponent.class) && !MoreElements.isAnnotationPresent(e, AutoSubcomponent.class) ||
-                                !MoreElements.isAnnotationPresent(e, Component.class) && !MoreElements.isAnnotationPresent(e, AutoComponent.class)) {
-                            errors.addInvalid("@AutoSubcomponent must be added to a class that is itself annotated with @Component, @Subcomponent, @AutoComponent or @AutoSubcomponent. But %s is not", e.getSimpleName());
-                            continue;
-                        }
-                    }
                     typeMirrors.add(tm);
                 } catch (Exception e) {
                     errors.addInvalid(e.getMessage());
@@ -111,10 +94,6 @@ public class SubcomponentExtractor extends AbstractExtractor {
         }
 
         return true;
-    }
-
-    public List<TypeMirror> getAddsToTypeMirrors() {
-        return addsToTypeMirrors;
     }
 
     public List<TypeMirror> getModulesTypeMirrors() {

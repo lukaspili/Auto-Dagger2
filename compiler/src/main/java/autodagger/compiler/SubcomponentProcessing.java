@@ -13,10 +13,10 @@ import javax.lang.model.util.Types;
 
 import autodagger.AutoSubcomponent;
 import autodagger.compiler.utils.AutoComponentClassNameUtil;
+import dagger.Subcomponent;
 import processorworkflow.AbstractComposer;
 import processorworkflow.AbstractProcessing;
 import processorworkflow.Errors;
-import processorworkflow.Logger;
 import processorworkflow.ProcessingBuilder;
 
 /**
@@ -36,7 +36,7 @@ public class SubcomponentProcessing extends AbstractProcessing<SubcomponentSpec,
 
     @Override
     public Set<Class<? extends Annotation>> supportedAnnotations() {
-        Set set = ImmutableSet.of(AutoSubcomponent.class);
+        Set set = ImmutableSet.of(AutoSubcomponent.class, Subcomponent.class);
         return set;
     }
 
@@ -58,7 +58,11 @@ public class SubcomponentProcessing extends AbstractProcessing<SubcomponentSpec,
         }
 
         extractors.add(extractor);
-        state.addSubcomponentExtractor(extractor);
+
+        if (!extractor.getModulesTypeMirrors().isEmpty()) {
+            state.addSubcomponentModule(element.asType(), extractor.getModulesTypeMirrors());
+        }
+
         return true;
     }
 
@@ -91,9 +95,6 @@ public class SubcomponentProcessing extends AbstractProcessing<SubcomponentSpec,
             if (extractor.getScopeAnnotationTypeMirror() != null) {
                 subcomponentSpec.setScopeAnnotationSpec(AnnotationSpec.get(extractor.getScopeAnnotationTypeMirror()));
             }
-
-            // addsTo
-            subcomponentSpec.setAddsToTypeNames(ProcessingUtil.getTypeNames(extractor.getAddsToTypeMirrors()));
 
             // modules
             subcomponentSpec.setModulesTypeNames(ProcessingUtil.getTypeNames(extractor.getModulesTypeMirrors()));

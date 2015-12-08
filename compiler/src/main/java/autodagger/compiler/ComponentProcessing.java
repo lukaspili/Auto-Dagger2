@@ -27,6 +27,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import autodagger.AutoComponent;
+import autodagger.AutoSubcomponent;
 import autodagger.compiler.utils.AutoComponentClassNameUtil;
 import processorworkflow.AbstractComposer;
 import processorworkflow.AbstractProcessing;
@@ -146,9 +147,50 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
             componentSpec.setModulesTypeNames(ProcessingUtil.getTypeNames(extractor.getModulesTypeMirrors()));
 
             // subcomponents
-            componentSpec.setSubcomponentsMethodSpecs(getSubcomponents());
+            componentSpec.setSubcomponentsSpecs(getSubcomponents());
 
             return componentSpec;
+        }
+
+        private List<MethodSpec> getSubcomponents() {
+            if (extractor.getSubcomponentsTypeMirrors().isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<MethodSpec> methodSpecs = new ArrayList<>(extractor.getSubcomponentsTypeMirrors().size());
+            for (TypeMirror typeMirror : extractor.getSubcomponentsTypeMirrors()) {
+                Element e = MoreTypes.asElement(typeMirror);
+                TypeName typeName;
+                String name;
+                if (MoreElements.isAnnotationPresent(e, AutoSubcomponent.class)) {
+                    ClassName cls = AutoComponentClassNameUtil.getComponentClassName(e);
+                    typeName = cls;
+                    name = cls.simpleName();
+                } else {
+                    typeName = TypeName.get(typeMirror);
+                    name = e.getSimpleName().toString();
+                }
+
+                List<TypeMirror> modules = state.getSubcomponentModules(typeMirror);
+                List<ParameterSpec> parameterSpecs;
+                if(modules != null) {
+                    parameterSpecs = new ArrayList<>(modules.size());
+                    int count = 0;
+                    for (TypeMirror moduleTypeMirror : modules) {
+                        parameterSpecs.add(ParameterSpec.builder(TypeName.get(moduleTypeMirror), String.format("module%d", ++count)).build());
+                    }
+                } else {
+                    parameterSpecs = new ArrayList<>(0);
+                }
+
+                methodSpecs.add(MethodSpec.methodBuilder("plus" + name)
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .addParameters(parameterSpecs)
+                        .returns(typeName)
+                        .build());
+            }
+
+            return methodSpecs;
         }
 
         private List<TypeName> getDependencies() {
@@ -177,32 +219,6 @@ public class ComponentProcessing extends AbstractProcessing<ComponentSpec, State
             }
 
             return typeNames;
-        }
-
-        private List<MethodSpec> getSubcomponents() {
-            List<SubcomponentExtractor> subcomponentExtractors = state.getSubcomponentExtractors(extractor.getTargetTypeMirror());
-            if (subcomponentExtractors == null) {
-                return Collections.emptyList();
-            }
-
-            List<MethodSpec> methodSpecs = new ArrayList<>(subcomponentExtractors.size());
-            for (SubcomponentExtractor subcomponentExtractor : subcomponentExtractors) {
-                ClassName className = AutoComponentClassNameUtil.getComponentClassName(subcomponentExtractor.getElement());
-
-                List<ParameterSpec> parameterSpecs = new ArrayList<>(subcomponentExtractor.getModulesTypeMirrors().size());
-                int count = 0;
-                for (TypeMirror typeMirror : subcomponentExtractor.getModulesTypeMirrors()) {
-                    parameterSpecs.add(ParameterSpec.builder(TypeName.get(typeMirror), String.format("module%d", ++count)).build());
-                }
-
-                methodSpecs.add(MethodSpec.methodBuilder("plus" + className.simpleName())
-                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .addParameters(parameterSpecs)
-                        .returns(className)
-                        .build());
-            }
-
-            return methodSpecs;
         }
     }
 }

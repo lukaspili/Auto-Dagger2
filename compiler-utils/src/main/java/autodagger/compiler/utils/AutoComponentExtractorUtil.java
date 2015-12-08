@@ -27,7 +27,7 @@ public class AutoComponentExtractorUtil {
     public static final String ANNOTATION_TARGET = "target";
     public static final String ANNOTATION_SUPERINTERFACES = "superinterfaces";
     public static final String ANNOTATION_INCLUDES = "includes";
-    public static final String ANNOTATION_ADDSTO = "addsTo";
+    public static final String ANNOTATION_SUBCOMPONENTS = "subcomponents";
 
     public static List<TypeMirror> getDependencies(AnnotationMirror autoComponentAnnotationMirror, Errors.ElementErrors errors) {
         // get dependency from @AutoComponent

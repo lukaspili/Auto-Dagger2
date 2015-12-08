@@ -9,11 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface AutoSubcomponent {
 
-    /**
-     * Specify the components and/or the @AutoComponent targets that will contain the following generated subcomponent
-     */
-    Class<?>[] addsTo();
-
     Class<?>[] modules() default {};
 
     Class<?>[] superinterfaces() default {};
