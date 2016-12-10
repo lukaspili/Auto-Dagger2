@@ -1,5 +1,6 @@
 package autodagger.example;
 
+import autodagger.AutoInjector;
 import autodagger.AutoSubcomponent;
 
 /**
@@ -7,6 +8,7 @@ import autodagger.AutoSubcomponent;
  */
 @AutoSubcomponent
 @DaggerScope(MySubObject1.class)
+@AutoInjector
 public class MySubObject1 {
 
 }
