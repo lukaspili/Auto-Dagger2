@@ -1,13 +1,24 @@
 package autodagger.compiler;
 
+import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
@@ -108,7 +119,52 @@ public class SubcomponentProcessing extends AbstractProcessing<SubcomponentSpec,
             // injector
             subcomponentSpec.setInjectorSpecs(ProcessingUtil.getAdditions(extractor.getElement(), state.getInjectorExtractors()));
 
+            // subcomponents
+            subcomponentSpec.setSubcomponentsSpecs(getSubcomponents());
+
             return subcomponentSpec;
         }
+
+        private List<MethodSpec> getSubcomponents() {
+            if (extractor.getSubcomponentsTypeMirrors().isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<MethodSpec> methodSpecs = new ArrayList<>(extractor.getSubcomponentsTypeMirrors().size());
+            for (TypeMirror typeMirror : extractor.getSubcomponentsTypeMirrors()) {
+                Element e = MoreTypes.asElement(typeMirror);
+                TypeName typeName;
+                String name;
+                if (MoreElements.isAnnotationPresent(e, AutoSubcomponent.class)) {
+                    ClassName cls = AutoComponentClassNameUtil.getComponentClassName(e);
+                    typeName = cls;
+                    name = cls.simpleName();
+                } else {
+                    typeName = TypeName.get(typeMirror);
+                    name = e.getSimpleName().toString();
+                }
+
+                List<TypeMirror> modules = state.getSubcomponentModules(typeMirror);
+                List<ParameterSpec> parameterSpecs;
+                if(modules != null) {
+                    parameterSpecs = new ArrayList<>(modules.size());
+                    int count = 0;
+                    for (TypeMirror moduleTypeMirror : modules) {
+                        parameterSpecs.add(ParameterSpec.builder(TypeName.get(moduleTypeMirror), String.format("module%d", ++count)).build());
+                    }
+                } else {
+                    parameterSpecs = new ArrayList<>(0);
+                }
+
+                methodSpecs.add(MethodSpec.methodBuilder("plus" + name)
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .addParameters(parameterSpecs)
+                        .returns(typeName)
+                        .build());
+            }
+
+            return methodSpecs;
+        }
     }
+
 }

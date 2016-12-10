@@ -64,6 +64,10 @@ public class SubcomponentComposer extends AbstractComposer<SubcomponentSpec> {
             builder.addMethod(exposeBuilder.build());
         }
 
+        if (!subcomponentSpec.getSubcomponentsSpecs().isEmpty()) {
+            builder.addMethods(subcomponentSpec.getSubcomponentsSpecs());
+        }
+
         TypeSpec typeSpec = builder.build();
         return JavaFile.builder(subcomponentSpec.getClassName().packageName(), typeSpec).build();
     }

@@ -1,6 +1,7 @@
 package autodagger.compiler;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import javax.lang.model.util.Types;
 
 import autodagger.AutoSubcomponent;
 import autodagger.compiler.utils.AutoComponentExtractorUtil;
+import dagger.Subcomponent;
 import processorworkflow.AbstractExtractor;
 import processorworkflow.Errors;
 import processorworkflow.ExtractorUtils;
@@ -26,6 +28,7 @@ public class SubcomponentExtractor extends AbstractExtractor {
 
     private List<TypeMirror> modulesTypeMirrors;
     private List<TypeMirror> superinterfacesTypeMirrors;
+    private List<TypeMirror> subcomponentsTypeMirrors;
     private AnnotationMirror scopeAnnotationTypeMirror;
 
     public SubcomponentExtractor(Element element, Types types, Elements elements, Errors errors) {
@@ -37,6 +40,7 @@ public class SubcomponentExtractor extends AbstractExtractor {
     @Override
     public void extract() {
         modulesTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_MODULES);
+        subcomponentsTypeMirrors = findTypeMirrors(element, AutoComponentExtractorUtil.ANNOTATION_SUBCOMPONENTS);
         if (!MoreElements.isAnnotationPresent(element, AutoSubcomponent.class)) {
             return;
         }
@@ -46,6 +50,8 @@ public class SubcomponentExtractor extends AbstractExtractor {
     }
 
     private List<TypeMirror> findTypeMirrors(Element element, String name) {
+        boolean addsTo = name.equals(AutoComponentExtractorUtil.ANNOTATION_SUBCOMPONENTS);
+
         List<TypeMirror> typeMirrors = new ArrayList<>();
         List<AnnotationValue> values = ExtractorUtils.getValueFromAnnotation(element, AutoSubcomponent.class, name);
         if (values != null) {
@@ -56,6 +62,13 @@ public class SubcomponentExtractor extends AbstractExtractor {
 
                 try {
                     TypeMirror tm = (TypeMirror) value.getValue();
+                    if (addsTo) {
+                        Element e = MoreTypes.asElement(tm);
+                        if (!MoreElements.isAnnotationPresent(e, AutoSubcomponent.class) && !MoreElements.isAnnotationPresent(e, Subcomponent.class)) {
+                            errors.addInvalid("@AutoComponent cannot declare a subcomponent that is not annotated with @Subcomponent or @AutoSubcomponent: %s", e.getSimpleName());
+                            continue;
+                        }
+                    }
                     typeMirrors.add(tm);
                 } catch (Exception e) {
                     errors.addInvalid(e.getMessage());
@@ -102,6 +115,10 @@ public class SubcomponentExtractor extends AbstractExtractor {
 
     public AnnotationMirror getScopeAnnotationTypeMirror() {
         return scopeAnnotationTypeMirror;
+    }
+
+    public List<TypeMirror> getSubcomponentsTypeMirrors() {
+        return subcomponentsTypeMirrors;
     }
 
     public List<TypeMirror> getSuperinterfacesTypeMirrors() {

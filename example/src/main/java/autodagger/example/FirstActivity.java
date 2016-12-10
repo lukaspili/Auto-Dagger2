@@ -3,6 +3,7 @@ package autodagger.example;
 import android.app.Activity;
 import android.os.Bundle;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import autodagger.AutoComponent;
@@ -27,6 +28,7 @@ import dagger.Provides;
 public class FirstActivity extends Activity {
 
     private FirstActivityComponent component;
+    @Inject MySubObject1 mySubObject1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,8 @@ public class FirstActivity extends Activity {
                 .moduleTwo(new ModuleTwo())
                 .build();
         component.inject(this);
+
+        component.plusMySubObject2Component(new MySubObject2.Module(""), new MySubObject2.ModuleTwo()).plusMySubObject1Component().inject(mySubObject1);
     }
 
     @Module
@@ -69,6 +73,12 @@ public class FirstActivity extends Activity {
         @AutoExpose(FirstActivity.class)
         public MyObject4 providesMyObject4Qualifier2() {
             return new MyObject4();
+        }
+
+        @Provides
+        @DaggerScope(FirstActivity.class)
+        public MySubObject1 providesMySubObject1() {
+            return new MySubObject1();
         }
     }
 

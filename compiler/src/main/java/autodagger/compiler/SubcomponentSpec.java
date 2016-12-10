@@ -2,6 +2,7 @@ package autodagger.compiler;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class SubcomponentSpec {
     private List<AdditionSpec> exposeSpecs;
     private List<TypeName> modulesTypeNames;
     private List<TypeName> superinterfacesTypeNames;
+    private List<MethodSpec> subcomponentsSpecs;
 
     public SubcomponentSpec(ClassName className) {
         this.className = className;
@@ -64,5 +66,13 @@ public class SubcomponentSpec {
 
     public void setSuperinterfacesTypeNames(List<TypeName> superinterfacesTypeNames) {
         this.superinterfacesTypeNames = superinterfacesTypeNames;
+    }
+
+    public List<MethodSpec> getSubcomponentsSpecs() {
+        return subcomponentsSpecs;
+    }
+
+    public void setSubcomponentsSpecs(List<MethodSpec> subcomponentsSpecs) {
+        this.subcomponentsSpecs = subcomponentsSpecs;
     }
 }

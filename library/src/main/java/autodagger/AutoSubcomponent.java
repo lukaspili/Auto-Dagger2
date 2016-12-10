@@ -12,4 +12,9 @@ public @interface AutoSubcomponent {
     Class<?>[] modules() default {};
 
     Class<?>[] superinterfaces() default {};
+
+    /**
+     * Subcomponents to be declared inside this component
+     */
+    Class<?>[] subcomponents() default {};
 }
